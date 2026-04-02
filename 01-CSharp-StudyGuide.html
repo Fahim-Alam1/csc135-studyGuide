@@ -65,6 +65,12 @@
     border-bottom: 1px solid var(--border);
     margin-bottom: 10px;
   }
+  .sidebar-header h2 a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .sidebar-header h2 a:hover { opacity: 0.75; }
   .sidebar-header h2 {
     font-size: 1.1rem;
     color: var(--accent);
@@ -76,6 +82,23 @@
     color: var(--text2);
     margin-top: 4px;
   }
+  .home-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .home-btn:hover {
+    color: var(--accent);
+    background: rgba(56,189,248,0.05);
+    border-left-color: var(--accent);
+  }
+  .home-btn .icon { font-size: 1rem; width: 24px; text-align: center; }
   .nav-section {
     padding: 8px 20px;
     font-size: 0.7rem;
@@ -477,9 +500,12 @@
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h2>CSC 135</h2>
+    <h2><a href="index.html">CSC 135</a></h2>
     <p>C# Study Guide</p>
   </div>
+  <a class="home-btn" href="index.html">
+    <span class="icon">&#8592;</span> Back to All Guides
+  </a>
   <div class="search-wrapper">
     <span class="search-icon">&#128269;</span>
     <input type="text" class="search-input" id="searchInput" placeholder="Search topics...">
