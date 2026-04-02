@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 135 - C# Study Guide</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --bg3: #334155;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #a78bfa;
+    --green: #4ade80;
+    --red: #f87171;
+    --orange: #fb923c;
+    --yellow: #facc15;
+    --border: #475569;
+    --code-bg: #0c1222;
+    --card: #1e293b;
+    --card-hover: #263548;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --bg2: #ffffff;
+    --bg3: #e2e8f0;
+    --text: #1e293b;
+    --text2: #64748b;
+    --border: #cbd5e1;
+    --code-bg: #f8fafc;
+    --card: #ffffff;
+    --card-hover: #f8fafc;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    transition: background 0.3s, color 0.3s;
+  }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+
+  /* NAV SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; z-index: 100;
+    padding: 20px 0;
+    transition: transform 0.3s;
+  }
+  .sidebar.closed { transform: translateX(-280px); }
+  .sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .sidebar-header h2 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .sidebar-header p {
+    font-size: 0.8rem;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+  .nav-section {
+    padding: 8px 20px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+  }
+  .nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+  }
+  .nav-link:hover, .nav-link.active {
+    color: var(--accent);
+    background: rgba(56,189,248,0.05);
+    border-left-color: var(--accent);
+  }
+  .nav-link .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+  /* MAIN */
+  .main {
+    margin-left: 280px;
+    padding: 30px 40px 60px;
+    max-width: 960px;
+    transition: margin-left 0.3s;
+  }
+  .main.full { margin-left: 0; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 30px;
+    position: sticky; top: 0;
+    background: var(--bg);
+    padding: 12px 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .hamburger {
+    display: none;
+    background: none; border: none; color: var(--text);
+    font-size: 1.5rem; cursor: pointer;
+  }
+  .theme-toggle {
+    background: var(--bg3); border: none; color: var(--text);
+    padding: 8px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 0.85rem; transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--border); }
+
+  /* PROGRESS BAR */
+  .progress-container {
+    background: var(--bg3); border-radius: 12px;
+    height: 8px; width: 200px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; border-radius: 12px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+  }
+  .progress-text { font-size: 0.8rem; color: var(--text2); margin-left: 8px; }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .section.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--accent);
+    margin: 30px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--bg3);
+  }
+  h3 { font-size: 1.1rem; color: var(--accent3); margin: 20px 0 8px; }
+  .subtitle { font-size: 1rem; color: var(--text2); margin-bottom: 24px; }
+
+  p { margin-bottom: 12px; color: var(--text); }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; color: var(--text); }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 14px 0 20px;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block code {
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre;
+  }
+  .code-label {
+    position: absolute; top: 8px; right: 12px;
+    font-size: 0.65rem; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text2);
+    background: var(--bg3); padding: 2px 8px; border-radius: 4px;
+  }
+  .copy-btn {
+    position: absolute; top: 8px; right: 70px;
+    background: var(--bg3); border: none; color: var(--text2);
+    padding: 2px 10px; border-radius: 4px; cursor: pointer;
+    font-size: 0.7rem; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--accent); color: #000; }
+
+  /* Syntax highlighting */
+  .kw { color: #c084fc; } /* keywords */
+  .tp { color: #38bdf8; } /* types */
+  .str { color: #4ade80; } /* strings */
+  .cm { color: #64748b; } /* comments */
+  .num { color: #fb923c; } /* numbers */
+  .fn { color: #facc15; } /* functions */
+  .op { color: #f472b6; } /* operators */
+
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card h4 { color: var(--accent); font-size: 0.95rem; margin-bottom: 8px; }
+  .card p { font-size: 0.85rem; color: var(--text2); margin: 0; }
+  .card code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* FLASHCARDS */
+  .flashcard-container {
+    perspective: 1000px;
+    margin: 20px 0;
+  }
+  .flashcard {
+    width: 100%; min-height: 200px;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute; width: 100%; min-height: 200px;
+    backface-visibility: hidden;
+    border-radius: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px;
+    text-align: center;
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border: 1px solid var(--border);
+  }
+  .flashcard-back {
+    background: linear-gradient(135deg, #1a1a4e, #2d1b69);
+    border: 1px solid var(--accent2);
+    transform: rotateY(180deg);
+    color: #e2e8f0;
+  }
+  [data-theme="light"] .flashcard-back {
+    background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+    color: #1e293b;
+  }
+  .flashcard-front h3 { color: var(--accent); font-size: 1.2rem; }
+  .flashcard-front p { color: var(--text2); font-size: 0.85rem; margin-top: 10px; }
+  .flashcard-back p { font-size: 1rem; line-height: 1.6; }
+  .flashcard-nav {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    margin-top: 16px;
+  }
+  .flashcard-nav button {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 20px; border-radius: 8px;
+    cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+  }
+  .flashcard-nav button:hover { background: var(--accent); color: #000; }
+  .flashcard-counter { font-size: 0.85rem; color: var(--text2); }
+
+  /* QUIZ */
+  .quiz-question {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .quiz-question h4 {
+    font-size: 1rem;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .quiz-question .q-num {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-right: 8px;
+  }
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: rgba(56,189,248,0.05); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+  .quiz-option.disabled { pointer-events: none; }
+  .quiz-explanation {
+    display: none;
+    margin-top: 10px;
+    padding: 12px;
+    background: rgba(56,189,248,0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--text2);
+  }
+  .quiz-explanation.show { display: block; }
+  .quiz-score {
+    text-align: center;
+    padding: 30px;
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin: 20px 0;
+    display: none;
+  }
+  .quiz-score h3 { font-size: 1.5rem; margin-bottom: 10px; }
+  .quiz-score .score-num { font-size: 3rem; font-weight: 800; }
+  .quiz-reset {
+    background: var(--accent); border: none; color: #000;
+    padding: 10px 28px; border-radius: 8px; cursor: pointer;
+    font-size: 0.95rem; font-weight: 600; margin-top: 16px;
+    transition: opacity 0.2s;
+  }
+  .quiz-reset:hover { opacity: 0.85; }
+
+  /* CHEAT SHEET TABLE */
+  .cheat-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .cheat-table th {
+    background: var(--bg3);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+  }
+  .cheat-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .cheat-table tr:hover td { background: rgba(56,189,248,0.03); }
+  .cheat-table code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex; gap: 4px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    background: none; border: none;
+    color: var(--text2);
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* KEY CONCEPT CALLOUT */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: rgba(56,189,248,0.05);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+  }
+  .callout.warning {
+    border-left-color: var(--orange);
+    background: rgba(251,146,60,0.05);
+  }
+  .callout.success {
+    border-left-color: var(--green);
+    background: rgba(74,222,128,0.05);
+  }
+  .callout strong { color: var(--accent); }
+  .callout.warning strong { color: var(--orange); }
+  .callout.success strong { color: var(--green); }
+
+  /* SEARCH */
+  .search-input {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+    margin: 10px 20px 10px;
+    width: calc(100% - 40px);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-wrapper { position: relative; }
+  .search-icon {
+    position: absolute;
+    left: 32px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text2);
+    font-size: 0.9rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-280px); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 20px; }
+    .hamburger { display: block; }
+    .progress-container { width: 120px; }
+    h1 { font-size: 1.5rem; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>CSC 135</h2>
+    <p>C# Study Guide</p>
+  </div>
+  <div class="search-wrapper">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search topics...">
+  </div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-link active" data-section="overview" onclick="showSection('overview')">
+    <span class="icon">&#127968;</span> Overview
+  </a>
+  <a class="nav-link" data-section="course" onclick="showSection('course')">
+    <span class="icon">&#128218;</span> Course Info
+  </a>
+  <div class="nav-section">Core Topics</div>
+  <a class="nav-link" data-section="intro" onclick="showSection('intro')">
+    <span class="icon">&#9889;</span> What is C#?
+  </a>
+  <a class="nav-link" data-section="datatypes" onclick="showSection('datatypes')">
+    <span class="icon">&#128230;</span> Data Types
+  </a>
+  <a class="nav-link" data-section="io" onclick="showSection('io')">
+    <span class="icon">&#128421;</span> Input & Output
+  </a>
+  <a class="nav-link" data-section="decisions" onclick="showSection('decisions')">
+    <span class="icon">&#128256;</span> Decisions
+  </a>
+  <a class="nav-link" data-section="operators" onclick="showSection('operators')">
+    <span class="icon">&#10133;</span> Operators
+  </a>
+  <a class="nav-link" data-section="loops" onclick="showSection('loops')">
+    <span class="icon">&#128260;</span> Loops
+  </a>
+  <a class="nav-link" data-section="collections" onclick="showSection('collections')">
+    <span class="icon">&#128451;</span> Collections
+  </a>
+  <a class="nav-link" data-section="structs" onclick="showSection('structs')">
+    <span class="icon">&#127959;</span> Structures
+  </a>
+  <a class="nav-link" data-section="valueref" onclick="showSection('valueref')">
+    <span class="icon">&#128279;</span> Value vs Ref Types
+  </a>
+  <a class="nav-link" data-section="generics" onclick="showSection('generics')">
+    <span class="icon">&#128300;</span> Generic Collections
+  </a>
+  <div class="nav-section">Study Tools</div>
+  <a class="nav-link" data-section="flashcards" onclick="showSection('flashcards')">
+    <span class="icon">&#127183;</span> Flashcards
+  </a>
+  <a class="nav-link" data-section="cheatsheet" onclick="showSection('cheatsheet')">
+    <span class="icon">&#128203;</span> Cheat Sheet
+  </a>
+  <a class="nav-link" data-section="quiz" onclick="showSection('quiz')">
+    <span class="icon">&#127919;</span> Practice Quiz
+  </a>
+</nav>
+
+<!-- OVERLAY for mobile -->
+<div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;" onclick="toggleSidebar()"></div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="main">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+      <div class="progress-container"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <span class="progress-text" id="progressText">0 / 10 topics</span>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">&#9790; Dark</button>
+    </div>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="section active" id="sec-overview">
+    <h1>C# Study Guide</h1>
+    <p class="subtitle">CSC 135 - Computability and Formal Languages &mdash; Introduction to C#</p>
+    <div class="callout">
+      <strong>Exam Prep:</strong> This interactive guide covers all C# topics from the lecture. Use the sidebar to navigate, study flashcards, review the cheat sheet, and test yourself with the quiz.
+    </div>
+    <h2>What You'll Learn</h2>
+    <div class="card-grid">
+      <div class="card" onclick="showSection('intro')">
+        <h4>&#9889; C# Fundamentals</h4>
+        <p>What C# is, where it's used, and the development toolkit.</p>
+      </div>
+      <div class="card" onclick="showSection('datatypes')">
+        <h4>&#128230; Data Types</h4>
+        <p>int, long, float, double, decimal, char, string, bool, arrays, nullable, and more.</p>
+      </div>
+      <div class="card" onclick="showSection('io')">
+        <h4>&#128421; Input & Output</h4>
+        <p>Console.ReadLine, Console.WriteLine, string interpolation, and formatting.</p>
+      </div>
+      <div class="card" onclick="showSection('decisions')">
+        <h4>&#128256; Decisions & Operators</h4>
+        <p>if/else, arithmetic, logical, relational, and conditional operators.</p>
+      </div>
+      <div class="card" onclick="showSection('loops')">
+        <h4>&#128260; Loops</h4>
+        <p>while loops, for loops, iterating through arrays.</p>
+      </div>
+      <div class="card" onclick="showSection('collections')">
+        <h4>&#128451; Collections</h4>
+        <p>Arrays, Lists, and generic collection objects.</p>
+      </div>
+      <div class="card" onclick="showSection('structs')">
+        <h4>&#127959; Structures</h4>
+        <p>Structs, value types, methods on structs.</p>
+      </div>
+      <div class="card" onclick="showSection('valueref')">
+        <h4>&#128279; Value vs Reference</h4>
+        <p>Pass by value vs pass by reference with the ref keyword.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COURSE INFO ===== -->
+  <div class="section" id="sec-course">
+    <h1>Course Information</h1>
+    <p class="subtitle">CSC 135-05 &mdash; Dr. Pradeep Tapadiya</p>
+
+    <h2>Instructor</h2>
+    <ul>
+      <li><strong>Name:</strong> Dr. Pradeep Tapadiya</li>
+      <li><strong>Background:</strong> PhD in Computer Science, MS in Electrical Engineering</li>
+      <li><strong>Experience:</strong> 30+ years designing and developing enterprise applications</li>
+      <li><strong>Books Authored:</strong> ".NET Programming using C#" and "COM+ Programming"</li>
+      <li><strong>Email:</strong> pradeep.tapadiya@csus.edu</li>
+      <li><strong>Office Hours:</strong> Fridays after class</li>
+    </ul>
+
+    <h2>Course Overview</h2>
+    <ul>
+      <li>Introduction to different aspects of programming languages</li>
+      <li>Functional programming</li>
+      <li>Dynamic typed languages</li>
+      <li>Phases of a compiler</li>
+      <li>Computer theories</li>
+      <li>Focus on data structures, algorithms, and programming techniques related to formal languages and computability</li>
+    </ul>
+
+    <h2>Grading Breakdown</h2>
+    <table class="cheat-table">
+      <tr><th>Component</th><th>Points</th><th>Details</th></tr>
+      <tr><td>Quizzes</td><td>60 pts</td><td>15 in-class quizzes, 4 pts each</td></tr>
+      <tr><td>Homework</td><td>12 pts</td><td>4 assignments</td></tr>
+      <tr><td>Midterm Exam</td><td>10 pts</td><td>In class</td></tr>
+      <tr><td>Final Exam</td><td>15 pts</td><td>In class</td></tr>
+      <tr><td>Discretion</td><td>3 pts</td><td>Instructor's discretion</td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Attendance Policy:</strong> You lose points for missing a class, homework, or exam. If absence is unavoidable, you must produce documentation.
+    </div>
+
+    <h2>Prerequisites</h2>
+    <ul>
+      <li>CSC 28</li>
+      <li>CSC 35</li>
+      <li>CSC 130</li>
+    </ul>
+  </div>
+
+  <!-- ===== WHAT IS C# ===== -->
+  <div class="section" id="sec-intro">
+    <h1>What is C#?</h1>
+    <p class="subtitle">A modern, type-safe, object-oriented language by Microsoft</p>
+
+    <div class="callout">
+      <strong>Key Fact:</strong> C# is a modern type-safe object-oriented language developed by Microsoft. It runs on Windows, Mac, and Linux.
+    </div>
+
+    <h2>Where is C# Used?</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>&#127760; Web Development</h4>
+        <p>ASP.NET for building web apps and APIs</p>
+      </div>
+      <div class="card">
+        <h4>&#127918; Game Development</h4>
+        <p>Unity engine - one of the most popular game engines</p>
+      </div>
+      <div class="card">
+        <h4>&#128187; Desktop / Mobile</h4>
+        <p>WPF, WinForms, MAUI for cross-platform apps</p>
+      </div>
+    </div>
+
+    <h2>Why Learn C#?</h2>
+    <ul>
+      <li>Massive job market</li>
+      <li>Runs on Windows, Mac, and Linux</li>
+      <li>Strong type safety and modern language features</li>
+    </ul>
+
+    <h2>Toolkit</h2>
+    <ul>
+      <li><strong>.NET Fiddle</strong> (dotnetfiddle.net) &mdash; browser-based C# playground</li>
+      <li><strong>Visual Studio Code</strong> &mdash; lightweight, cross-platform editor</li>
+    </ul>
+
+    <h2>Hello, World!</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">using</span> System;
+
+<span class="kw">namespace</span> SampleApp
+{
+    <span class="kw">class</span> <span class="tp">Program</span>
+    {
+        <span class="kw">static void</span> <span class="fn">Main</span>(<span class="tp">string</span>[] args)
+        {
+            <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Hello, World!"</span>);
+        }
+    }
+}</code>
+    </div>
+    <div class="callout success">
+      <strong>Key Points:</strong> Every C# program needs a <code>Main</code> method as the entry point. The <code>using System;</code> directive imports the System namespace. <code>Console.WriteLine</code> prints text to the console.
+    </div>
+  </div>
+
+  <!-- ===== DATA TYPES ===== -->
+  <div class="section" id="sec-datatypes">
+    <h1>Data Types</h1>
+    <p class="subtitle">C# is statically typed &mdash; every variable has a fixed type at compile time</p>
+
+    <h2>Common Data Types</h2>
+    <table class="cheat-table">
+      <tr><th>Type</th><th>Description</th><th>Example</th></tr>
+      <tr><td><code>int</code></td><td>32-bit integer</td><td><code>int x = 42;</code></td></tr>
+      <tr><td><code>long</code></td><td>64-bit integer</td><td><code>long y = 1234567890123L;</code></td></tr>
+      <tr><td><code>float</code></td><td>32-bit floating point</td><td><code>float f = 3.14f;</code></td></tr>
+      <tr><td><code>double</code></td><td>64-bit floating point</td><td><code>double d = 2.718281828459;</code></td></tr>
+      <tr><td><code>decimal</code></td><td>128-bit precise decimal</td><td><code>decimal m = 19.99m;</code></td></tr>
+      <tr><td><code>char</code></td><td>Single character</td><td><code>char c = 'A';</code></td></tr>
+      <tr><td><code>string</code></td><td>Text sequence</td><td><code>string s = "Hello";</code></td></tr>
+      <tr><td><code>bool</code></td><td>true / false</td><td><code>bool b = true;</code></td></tr>
+      <tr><td><code>DateTime</code></td><td>Date and time</td><td><code>DateTime.Now</code></td></tr>
+      <tr><td><code>object</code></td><td>Base type of all types</td><td><code>object o = "text";</code></td></tr>
+      <tr><td><code>var</code></td><td>Compiler-inferred type</td><td><code>var x = 100;</code></td></tr>
+      <tr><td><code>int?</code></td><td>Nullable integer</td><td><code>int? n = null;</code></td></tr>
+      <tr><td><code>int[]</code></td><td>Array of integers</td><td><code>int[] a = {1,2,3};</code></td></tr>
+    </table>
+
+    <h2>Full Example</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">int</span> integer = <span class="num">42</span>;
+<span class="tp">long</span> longInt = <span class="num">1234567890123L</span>;
+<span class="tp">float</span> floatNum = <span class="num">3.14f</span>;
+<span class="tp">double</span> doubleNum = <span class="num">2.718281828459</span>;
+<span class="tp">decimal</span> money = <span class="num">19.99m</span>;
+<span class="tp">char</span> letter = <span class="str">'A'</span>;
+<span class="tp">string</span> text = <span class="str">"Sample text"</span>;
+<span class="tp">bool</span> flag = <span class="kw">true</span>;
+<span class="tp">DateTime</span> now = <span class="tp">DateTime</span>.Now;
+<span class="tp">object</span> obj = <span class="str">"An object holding a string"</span>;
+<span class="kw">var</span> inferred = <span class="num">100</span>;          <span class="cm">// int inferred by compiler</span>
+<span class="tp">int</span>? nullableInt = <span class="kw">null</span>;
+<span class="tp">int</span>[] numbers = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span> };</code>
+    </div>
+
+    <div class="callout warning">
+      <strong>Remember the suffixes:</strong> <code>L</code> for long, <code>f</code> for float, <code>m</code> for decimal. Without these, literals default to <code>int</code> or <code>double</code>.
+    </div>
+  </div>
+
+  <!-- ===== INPUT & OUTPUT ===== -->
+  <div class="section" id="sec-io">
+    <h1>Input & Output</h1>
+    <p class="subtitle">Reading from and writing to the console</p>
+
+    <h2>Key Methods</h2>
+    <table class="cheat-table">
+      <tr><th>Method</th><th>Purpose</th></tr>
+      <tr><td><code>Console.Write()</code></td><td>Print without newline</td></tr>
+      <tr><td><code>Console.WriteLine()</code></td><td>Print with newline</td></tr>
+      <tr><td><code>Console.ReadLine()</code></td><td>Read a line of input (returns <code>string</code>)</td></tr>
+      <tr><td><code>int.TryParse()</code></td><td>Safely convert string to int</td></tr>
+    </table>
+
+    <h2>String Interpolation</h2>
+    <div class="callout">
+      <strong>Tip:</strong> Use <code>$"..."</code> to embed expressions directly in strings. This is called <em>string interpolation</em>.
+    </div>
+
+    <h2>Complete Example</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">Console</span>.<span class="fn">Write</span>(<span class="str">"Enter your name: "</span>);
+<span class="tp">string</span> name = <span class="tp">Console</span>.<span class="fn">ReadLine</span>() ?? <span class="tp">string</span>.Empty;
+
+<span class="tp">Console</span>.<span class="fn">Write</span>(<span class="str">"Enter your favorite number: "</span>);
+<span class="tp">string</span> numInput = <span class="tp">Console</span>.<span class="fn">ReadLine</span>() ?? <span class="str">"0"</span>;
+<span class="kw">if</span> (!<span class="tp">int</span>.<span class="fn">TryParse</span>(numInput, <span class="kw">out var</span> favorite)) favorite = <span class="num">0</span>;
+
+<span class="tp">decimal</span> price = <span class="num">12.34m</span>;
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Hello, {name}! Your favorite number is {favorite}."</span>);
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Formatted price: {price:C2}"</span>);
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Uppercased name: {name.ToUpper()}"</span>);</code>
+    </div>
+
+    <h3>Sample Output</h3>
+    <div class="code-block">
+      <span class="code-label">Output</span>
+      <code>Enter your name: Pradeep
+Enter your favorite number: 10
+Hello, Pradeep! Your favorite number is 10.
+Formatted price: $12.34
+Uppercased name: PRADEEP</code>
+    </div>
+
+    <div class="callout warning">
+      <strong>Null Safety:</strong> <code>Console.ReadLine()</code> can return null. Use the <code>??</code> (null-coalescing) operator to provide a default value. Use <code>int.TryParse</code> instead of <code>int.Parse</code> to avoid exceptions on bad input.
+    </div>
+  </div>
+
+  <!-- ===== DECISIONS ===== -->
+  <div class="section" id="sec-decisions">
+    <h1>Decisions</h1>
+    <p class="subtitle">Control flow with if, else if, and else</p>
+
+    <h2>if / else if / else</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">int</span> a = <span class="num">10</span>, b = <span class="num">3</span>;
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"a = {a}, b = {b}"</span>);
+
+<span class="kw">if</span> (a > b)
+{
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"a is greater than b"</span>);
+}
+<span class="kw">else if</span> (a == b)
+{
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"a equals b"</span>);
+}
+<span class="kw">else</span>
+{
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"a is less than b"</span>);
+}</code>
+    </div>
+
+    <div class="callout">
+      <strong>Key Points:</strong>
+      <ul style="margin-top:8px;">
+        <li>Conditions must be <code>bool</code> expressions (no truthy/falsy like JavaScript)</li>
+        <li>Use <code>==</code> for equality comparison (not <code>=</code> which is assignment)</li>
+        <li>Braces <code>{}</code> are recommended even for single-line bodies</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== OPERATORS ===== -->
+  <div class="section" id="sec-operators">
+    <h1>Operators</h1>
+    <p class="subtitle">Arithmetic, logical, relational, and conditional operators</p>
+
+    <h2>Arithmetic Operators</h2>
+    <table class="cheat-table">
+      <tr><th>Operator</th><th>Operation</th><th>Example</th></tr>
+      <tr><td><code>+</code></td><td>Addition</td><td><code>a + b</code></td></tr>
+      <tr><td><code>-</code></td><td>Subtraction</td><td><code>a - b</code></td></tr>
+      <tr><td><code>*</code></td><td>Multiplication</td><td><code>a * b</code></td></tr>
+      <tr><td><code>/</code></td><td>Division</td><td><code>a / b</code></td></tr>
+      <tr><td><code>%</code></td><td>Modulus (remainder)</td><td><code>a % b</code></td></tr>
+    </table>
+
+    <h2>Compound Assignment</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">int</span> c = <span class="num">5</span>;
+c += <span class="num">2</span>;   <span class="cm">// c = 7</span>
+c *= <span class="num">3</span>;   <span class="cm">// c = 21</span>
+c++;      <span class="cm">// c = 22</span></code>
+    </div>
+
+    <h2>Logical Operators</h2>
+    <table class="cheat-table">
+      <tr><th>Operator</th><th>Meaning</th><th>Example</th></tr>
+      <tr><td><code>&&</code></td><td>Logical AND</td><td><code>(a > b) && (b > 0)</code></td></tr>
+      <tr><td><code>||</code></td><td>Logical OR</td><td><code>(a < 5) || (b < 5)</code></td></tr>
+      <tr><td><code>!</code></td><td>Logical NOT</td><td><code>!flag</code></td></tr>
+    </table>
+
+    <h2>Conditional (Ternary) Operator</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">string</span> parity = (a % <span class="num">2</span> == <span class="num">0</span>) ? <span class="str">"even"</span> : <span class="str">"odd"</span>;</code>
+    </div>
+
+    <h2>String Comparison</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">string</span> s1 = <span class="str">"hello"</span>;
+<span class="tp">string</span> s2 = <span class="str">"Hello"</span>;
+<span class="kw">if</span> (s1.<span class="fn">Equals</span>(s2, <span class="tp">StringComparison</span>.OrdinalIgnoreCase))
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">"Strings are equal ignoring case"</span>);</code>
+    </div>
+
+    <div class="callout">
+      <strong>Exam Tip:</strong> Integer division truncates: <code>10 / 3 = 3</code> (not 3.33). The ternary operator <code>? :</code> is a concise alternative to if/else for simple assignments.
+    </div>
+  </div>
+
+  <!-- ===== LOOPS ===== -->
+  <div class="section" id="sec-loops">
+    <h1>Loops (Iteration)</h1>
+    <p class="subtitle">Repeating code with while and for loops</p>
+
+    <h2>while Loop</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">int</span> i = <span class="num">1</span>;
+<span class="kw">while</span> (i <= <span class="num">3</span>) {
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"while loop iteration: {i}"</span>);
+    i++;
+}</code>
+    </div>
+
+    <h2>for Loop &mdash; Iterating an Array</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">string</span>[] fruits = { <span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"cherry"</span> };
+<span class="kw">for</span> (<span class="tp">int</span> idx = <span class="num">0</span>; idx < fruits.Length; idx++) {
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"for loop index {idx}: {fruits[idx]}"</span>);
+}</code>
+    </div>
+
+    <h2>for Loop &mdash; Sum First N Numbers</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="tp">int</span> sum = <span class="num">0</span>;
+<span class="kw">for</span> (<span class="tp">int</span> n = <span class="num">1</span>; n <= <span class="num">5</span>; n++) {
+    sum += n;
+}
+<span class="cm">// sum = 15 (1+2+3+4+5)</span></code>
+    </div>
+
+    <div class="callout">
+      <strong>while vs for:</strong> Use <code>while</code> when you don't know how many iterations. Use <code>for</code> when you know the count or are iterating an index. Remember: <code>.Length</code> for arrays, <code>.Count</code> for lists.
+    </div>
+  </div>
+
+  <!-- ===== COLLECTIONS ===== -->
+  <div class="section" id="sec-collections">
+    <h1>Collections</h1>
+    <p class="subtitle">Arrays (fixed-size) and Lists (dynamic)</p>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(event, 'tab-arrays')">Arrays</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-lists')">Lists</button>
+    </div>
+
+    <div class="tab-content active" id="tab-arrays">
+      <h2>Arrays (Fixed-Size)</h2>
+      <div class="code-block">
+        <span class="code-label">C#</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <code><span class="cm">// Initialize with values</span>
+<span class="tp">int</span>[] numbers = <span class="kw">new</span> <span class="tp">int</span>[] { <span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span> };
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"array: {string.Join(", ", numbers)}"</span>);
+
+<span class="cm">// Create with 'new' and set values individually</span>
+<span class="tp">string</span>[] names = <span class="kw">new</span> <span class="tp">string</span>[<span class="num">3</span>];
+names[<span class="num">0</span>] = <span class="str">"Alice"</span>;
+names[<span class="num">1</span>] = <span class="str">"Bob"</span>;
+names[<span class="num">2</span>] = <span class="str">"Carol"</span>;
+
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i < names.Length; i++)
+{
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"names[{i}] = {names[i]}"</span>);
+}</code>
+      </div>
+      <div class="callout">
+        <strong>Arrays:</strong> Fixed size set at creation. Use <code>.Length</code> to get the size. Access elements with <code>[index]</code> (zero-based).
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-lists">
+      <h2>Lists (Dynamic)</h2>
+      <div class="code-block">
+        <span class="code-label">C#</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <code><span class="kw">var</span> fruits = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">string</span>&gt;() { <span class="str">"apple"</span>, <span class="str">"banana"</span> };
+fruits.<span class="fn">Add</span>(<span class="str">"cherry"</span>);   <span class="cm">// list grows dynamically</span>
+
+<span class="kw">for</span>(<span class="tp">int</span> i = <span class="num">0</span>; i &lt; fruits.Count; i++) {
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"fruits[{i}] = {fruits[i]}"</span>);
+}
+
+<span class="kw">foreach</span>(<span class="kw">var</span> fruit <span class="kw">in</span> fruits) {
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(fruit);
+}
+
+fruits.<span class="fn">Remove</span>(<span class="str">"banana"</span>);
+<span class="kw">if</span> (fruits.Count > <span class="num">0</span>) fruits.<span class="fn">RemoveAt</span>(<span class="num">0</span>);
+fruits.<span class="fn">Clear</span>();</code>
+      </div>
+      <div class="callout">
+        <strong>Lists vs Arrays:</strong> Lists grow/shrink dynamically. Use <code>.Count</code> (not <code>.Length</code>). Key methods: <code>Add()</code>, <code>Remove()</code>, <code>RemoveAt()</code>, <code>Clear()</code>. Also supports <code>foreach</code> loops.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STRUCTURES ===== -->
+  <div class="section" id="sec-structs">
+    <h1>Structures</h1>
+    <p class="subtitle">Lightweight value types for grouping related data</p>
+
+    <h2>Basic Struct</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">struct</span> <span class="tp">Point</span>
+{
+    <span class="kw">public</span> <span class="tp">int</span> X;
+    <span class="kw">public</span> <span class="tp">int</span> Y;
+}
+
+<span class="kw">var</span> point = <span class="kw">new</span> <span class="tp">Point</span> { X = <span class="num">3</span>, Y = <span class="num">4</span> };
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Point: ({point.X}, {point.Y})"</span>);
+
+<span class="cm">// Structs are value types - assigning COPIES the value</span>
+<span class="kw">var</span> copy = point;
+copy.X = <span class="num">10</span>;
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Original: ({point.X}, {point.Y})"</span>);  <span class="cm">// (3, 4)</span>
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Copy: ({copy.X}, {copy.Y})"</span>);        <span class="cm">// (10, 4)</span></code>
+    </div>
+
+    <div class="callout warning">
+      <strong>Critical Concept:</strong> Structs are <em>value types</em>. Assigning a struct to a new variable <strong>copies</strong> all data. Modifying the copy does NOT affect the original.
+    </div>
+
+    <h2>Struct with Methods</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">struct</span> <span class="tp">Rectangle</span> {
+    <span class="kw">public</span> <span class="tp">int</span> X;
+    <span class="kw">public</span> <span class="tp">int</span> Y;
+    <span class="kw">public</span> <span class="tp">int</span> Width;
+    <span class="kw">public</span> <span class="tp">int</span> Height;
+
+    <span class="kw">public</span> <span class="tp">Rectangle</span>(<span class="tp">int</span> x, <span class="tp">int</span> y, <span class="tp">int</span> width, <span class="tp">int</span> height) {
+        X = x; Y = y; Width = width; Height = height;
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">Area</span>() { <span class="kw">return</span> Width * Height; }
+}
+
+<span class="kw">var</span> rect = <span class="kw">new</span> <span class="tp">Rectangle</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">5</span>, <span class="num">2</span>);
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Rectangle area: {rect.Area()}"</span>); <span class="cm">// 10</span></code>
+    </div>
+  </div>
+
+  <!-- ===== VALUE VS REF ===== -->
+  <div class="section" id="sec-valueref">
+    <h1>Value vs Reference Types</h1>
+    <p class="subtitle">Understanding how data is passed to methods</p>
+
+    <h2>Pass by Value (Default)</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static void</span> <span class="fn">ChangeByValue</span>(<span class="tp">int</span> number)
+{
+    number = <span class="num">100</span>;  <span class="cm">// Only the local copy is changed</span>
+}
+
+<span class="tp">int</span> score = <span class="num">10</span>;
+<span class="fn">ChangeByValue</span>(score);
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(score);  <span class="cm">// Still 10!</span></code>
+    </div>
+
+    <h2>Pass by Reference (<code>ref</code>)</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static void</span> <span class="fn">ChangeByRef</span>(<span class="kw">ref</span> <span class="tp">int</span> number)
+{
+    number = <span class="num">100</span>;  <span class="cm">// The original memory location is updated</span>
+}
+
+<span class="tp">int</span> score = <span class="num">10</span>;
+<span class="fn">ChangeByRef</span>(<span class="kw">ref</span> score);
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(score);  <span class="cm">// Now 100!</span></code>
+    </div>
+
+    <div class="callout warning">
+      <strong>Exam Favorite:</strong> By default, value types (int, struct, etc.) are passed by <em>value</em> &mdash; the method gets a copy. Use the <code>ref</code> keyword on BOTH the method parameter AND the call site to pass by reference.
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>Pass by Value</h4>
+        <p>Method gets a <strong>copy</strong>. Changes inside the method do NOT affect the original variable.</p>
+      </div>
+      <div class="card">
+        <h4>Pass by Reference</h4>
+        <p>Method gets a <strong>reference to the original</strong>. Changes inside the method DO affect the original variable.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GENERIC COLLECTIONS ===== -->
+  <div class="section" id="sec-generics">
+    <h1>Generic Collection Objects</h1>
+    <p class="subtitle">Type-safe collections using generics (&lt;T&gt;)</p>
+
+    <h2>Common Generic Collections</h2>
+    <table class="cheat-table">
+      <tr><th>Collection</th><th>Description</th><th>Use Case</th></tr>
+      <tr><td><code>List&lt;T&gt;</code></td><td>Dynamic array</td><td>Ordered collection that grows/shrinks</td></tr>
+      <tr><td><code>Dictionary&lt;TKey, TValue&gt;</code></td><td>Key-value pairs</td><td>Fast lookup by key</td></tr>
+      <tr><td><code>Queue&lt;T&gt;</code></td><td>First-In, First-Out</td><td>Processing items in order</td></tr>
+      <tr><td><code>Stack&lt;T&gt;</code></td><td>Last-In, First-Out</td><td>Undo operations, parsing</td></tr>
+      <tr><td><code>LinkedList&lt;T&gt;</code></td><td>Doubly-linked list</td><td>Frequent insertions/deletions</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>What is &lt;T&gt;?</strong> The <code>T</code> is a <em>type parameter</em>. It lets you specify what type the collection holds, e.g., <code>List&lt;string&gt;</code> holds strings, <code>Queue&lt;int&gt;</code> holds integers. This provides compile-time type safety.
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>Queue&lt;T&gt; &mdash; FIFO</h4>
+        <p><code>Enqueue()</code> adds to back<br><code>Dequeue()</code> removes from front<br>Think: waiting in line</p>
+      </div>
+      <div class="card">
+        <h4>Stack&lt;T&gt; &mdash; LIFO</h4>
+        <p><code>Push()</code> adds to top<br><code>Pop()</code> removes from top<br>Think: stack of plates</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FLASHCARDS ===== -->
+  <div class="section" id="sec-flashcards">
+    <h1>Flashcards</h1>
+    <p class="subtitle">Click a card to reveal the answer. Use arrows to navigate.</p>
+    <div class="flashcard-container">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-front">
+          <h3 id="fc-question"></h3>
+          <p>Click to reveal answer</p>
+        </div>
+        <div class="flashcard-back">
+          <p id="fc-answer"></p>
+        </div>
+      </div>
+    </div>
+    <div class="flashcard-nav">
+      <button onclick="prevCard()">&#9664; Prev</button>
+      <span class="flashcard-counter" id="fc-counter">1 / 20</span>
+      <button onclick="nextCard()">Next &#9654;</button>
+      <button onclick="shuffleCards()">&#128256; Shuffle</button>
+    </div>
+  </div>
+
+  <!-- ===== CHEAT SHEET ===== -->
+  <div class="section" id="sec-cheatsheet">
+    <h1>Cheat Sheet</h1>
+    <p class="subtitle">Quick reference for exam day</p>
+
+    <h2>Program Structure</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <code><span class="kw">using</span> System;
+<span class="kw">namespace</span> MyApp {
+    <span class="kw">class</span> <span class="tp">Program</span> {
+        <span class="kw">static void</span> <span class="fn">Main</span>(<span class="tp">string</span>[] args) {
+            <span class="cm">// your code here</span>
+        }
+    }
+}</code>
+    </div>
+
+    <h2>Data Types Quick Reference</h2>
+    <table class="cheat-table">
+      <tr><th>Type</th><th>Size</th><th>Suffix</th><th>Example</th></tr>
+      <tr><td><code>int</code></td><td>32-bit</td><td>&mdash;</td><td><code>42</code></td></tr>
+      <tr><td><code>long</code></td><td>64-bit</td><td><code>L</code></td><td><code>123L</code></td></tr>
+      <tr><td><code>float</code></td><td>32-bit</td><td><code>f</code></td><td><code>3.14f</code></td></tr>
+      <tr><td><code>double</code></td><td>64-bit</td><td>&mdash;</td><td><code>2.71</code></td></tr>
+      <tr><td><code>decimal</code></td><td>128-bit</td><td><code>m</code></td><td><code>19.99m</code></td></tr>
+      <tr><td><code>bool</code></td><td>1-bit</td><td>&mdash;</td><td><code>true</code></td></tr>
+      <tr><td><code>char</code></td><td>16-bit</td><td>single quotes</td><td><code>'A'</code></td></tr>
+      <tr><td><code>string</code></td><td>variable</td><td>double quotes</td><td><code>"hi"</code></td></tr>
+    </table>
+
+    <h2>Operators Quick Reference</h2>
+    <table class="cheat-table">
+      <tr><th>Category</th><th>Operators</th></tr>
+      <tr><td>Arithmetic</td><td><code>+  -  *  /  %</code></td></tr>
+      <tr><td>Compound</td><td><code>+=  -=  *=  /=  ++  --</code></td></tr>
+      <tr><td>Relational</td><td><code>>  <  >=  <=  ==  !=</code></td></tr>
+      <tr><td>Logical</td><td><code>&&  ||  !</code></td></tr>
+      <tr><td>Ternary</td><td><code>condition ? trueVal : falseVal</code></td></tr>
+      <tr><td>Null-coalescing</td><td><code>??</code></td></tr>
+    </table>
+
+    <h2>Collections Quick Reference</h2>
+    <table class="cheat-table">
+      <tr><th>Feature</th><th>Array</th><th>List&lt;T&gt;</th></tr>
+      <tr><td>Size</td><td>Fixed</td><td>Dynamic</td></tr>
+      <tr><td>Length Property</td><td><code>.Length</code></td><td><code>.Count</code></td></tr>
+      <tr><td>Add items</td><td>At creation only</td><td><code>.Add()</code></td></tr>
+      <tr><td>Remove items</td><td>Not directly</td><td><code>.Remove()</code>, <code>.RemoveAt()</code></td></tr>
+      <tr><td>Declaration</td><td><code>int[] a = {1,2}</code></td><td><code>new List&lt;int&gt;(){1,2}</code></td></tr>
+    </table>
+
+    <h2>Value vs Reference Cheat</h2>
+    <table class="cheat-table">
+      <tr><th></th><th>Pass by Value</th><th>Pass by Reference</th></tr>
+      <tr><td>Keyword</td><td>none (default)</td><td><code>ref</code></td></tr>
+      <tr><td>What's passed</td><td>A copy</td><td>A reference to original</td></tr>
+      <tr><td>Original changes?</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Syntax</td><td><code>Method(x)</code></td><td><code>Method(ref x)</code></td></tr>
+    </table>
+  </div>
+
+  <!-- ===== QUIZ ===== -->
+  <div class="section" id="sec-quiz">
+    <h1>Practice Quiz</h1>
+    <p class="subtitle">Test your knowledge &mdash; 15 questions covering all topics</p>
+
+    <div id="quizContainer"></div>
+    <div class="quiz-score" id="quizScore">
+      <h3>Quiz Complete!</h3>
+      <div class="score-num" id="scoreNum"></div>
+      <p id="scoreMsg"></p>
+      <button class="quiz-reset" onclick="resetQuiz()">Retake Quiz</button>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<script>
+// =============== SECTION NAVIGATION ===============
+const visited = new Set(['overview']);
+const totalTopics = 10;
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector(`.nav-link[data-section="${id}"]`);
+  if (link) link.classList.add('active');
+
+  visited.add(id);
+  updateProgress();
+
+  // close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').style.display = 'none';
+  }
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  const topicSections = ['intro','datatypes','io','decisions','operators','loops','collections','structs','valueref','generics'];
+  const done = topicSections.filter(t => visited.has(t)).length;
+  const pct = Math.round((done / totalTopics) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = done + ' / ' + totalTopics + ' topics';
+}
+
+// =============== SIDEBAR TOGGLE ===============
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  if (window.innerWidth <= 768) {
+    sb.classList.toggle('open');
+    ov.style.display = sb.classList.contains('open') ? 'block' : 'none';
+  } else {
+    sb.classList.toggle('closed');
+    document.getElementById('main').classList.toggle('full');
+  }
+}
+
+// =============== THEME ===============
+function toggleTheme() {
+  const body = document.body;
+  const isLight = body.getAttribute('data-theme') === 'light';
+  body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  document.getElementById('themeBtn').innerHTML = isLight ? '&#9790; Dark' : '&#9788; Light';
+  localStorage.setItem('theme', isLight ? 'dark' : 'light');
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    document.body.setAttribute('data-theme', 'light');
+    document.getElementById('themeBtn').innerHTML = '&#9788; Light';
+  }
+})();
+
+// =============== COPY CODE ===============
+function copyCode(btn) {
+  const code = btn.parentElement.querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// =============== TABS ===============
+function switchTab(e, tabId) {
+  const bar = e.target.closest('.section').querySelector('.tab-bar');
+  bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  const section = e.target.closest('.section');
+  section.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  section.querySelector('#' + tabId).classList.add('active');
+}
+
+// =============== SEARCH ===============
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const text = link.textContent.toLowerCase();
+    link.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+
+// =============== FLASHCARDS ===============
+const flashcards = [
+  { q: "What is C#?", a: "A modern type-safe object-oriented language developed by Microsoft that runs on Windows, Mac, and Linux." },
+  { q: "What is the entry point of a C# program?", a: "The static void Main(string[] args) method inside a class." },
+  { q: "What suffix is used for float literals?", a: "f — e.g., 3.14f" },
+  { q: "What suffix is used for decimal literals?", a: "m — e.g., 19.99m" },
+  { q: "What suffix is used for long literals?", a: "L — e.g., 1234567890123L" },
+  { q: "What does Console.ReadLine() return?", a: "A string (or null). Use int.TryParse() to safely convert to a number." },
+  { q: "What is string interpolation in C#?", a: "Using $\"...\" to embed expressions directly: $\"Hello, {name}!\"" },
+  { q: "What does the ?? operator do?", a: "Null-coalescing operator — returns the left operand if non-null, otherwise the right. E.g., value ?? \"default\"" },
+  { q: "What is the result of 10 / 3 in C# (int division)?", a: "3 — integer division truncates the decimal part." },
+  { q: "What does the ternary operator look like?", a: "condition ? valueIfTrue : valueIfFalse — e.g., (x > 0) ? \"pos\" : \"neg\"" },
+  { q: "What is the difference between .Length and .Count?", a: ".Length is for arrays (fixed-size). .Count is for Lists and other collections (dynamic)." },
+  { q: "How do you add an element to a List?", a: "Use .Add(item) — e.g., fruits.Add(\"cherry\"); Lists grow dynamically." },
+  { q: "What happens when you assign a struct to a new variable?", a: "The entire struct is COPIED (value type). Modifying the copy does NOT affect the original." },
+  { q: "What is pass by value?", a: "The method receives a copy of the argument. Changes inside the method do NOT affect the original variable. This is the default in C#." },
+  { q: "What keyword enables pass by reference?", a: "ref — must be used on BOTH the method parameter AND the call site: ChangeByRef(ref score)" },
+  { q: "Name 5 generic collection types in C#.", a: "List<T>, Dictionary<TKey,TValue>, Queue<T>, Stack<T>, LinkedList<T>" },
+  { q: "What does Queue<T> use? FIFO or LIFO?", a: "FIFO — First-In, First-Out. Enqueue() adds, Dequeue() removes from front." },
+  { q: "What does Stack<T> use? FIFO or LIFO?", a: "LIFO — Last-In, First-Out. Push() adds to top, Pop() removes from top." },
+  { q: "What is a nullable type in C#?", a: "A value type that can also hold null — declared with ? suffix: int? x = null;" },
+  { q: "What is the difference between var and object?", a: "var is compiler-inferred (still strongly typed). object is the base type of all types and requires casting to use specific members." }
+];
+
+let fcIndex = 0;
+
+function renderCard() {
+  document.getElementById('fc-question').textContent = flashcards[fcIndex].q;
+  document.getElementById('fc-answer').textContent = flashcards[fcIndex].a;
+  document.getElementById('fc-counter').textContent = (fcIndex + 1) + ' / ' + flashcards.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function nextCard() {
+  fcIndex = (fcIndex + 1) % flashcards.length;
+  renderCard();
+}
+
+function prevCard() {
+  fcIndex = (fcIndex - 1 + flashcards.length) % flashcards.length;
+  renderCard();
+}
+
+function shuffleCards() {
+  for (let i = flashcards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+  }
+  fcIndex = 0;
+  renderCard();
+}
+
+renderCard();
+
+// =============== QUIZ ===============
+const quizData = [
+  {
+    q: "What type of language is C#?",
+    opts: ["Dynamically typed, interpreted", "Statically typed, object-oriented", "Functional-only", "Assembly-level"],
+    correct: 1,
+    explain: "C# is a modern type-safe object-oriented language developed by Microsoft."
+  },
+  {
+    q: "What is the entry point of a C# application?",
+    opts: ["public void Start()", "static void Main(string[] args)", "void init()", "static void Run()"],
+    correct: 1,
+    explain: "The Main method is the entry point. It must be static and is usually inside a Program class."
+  },
+  {
+    q: "Which suffix indicates a decimal literal?",
+    opts: ["d", "f", "m", "L"],
+    correct: 2,
+    explain: "The suffix 'm' is for decimal: decimal money = 19.99m; 'f' is for float, 'L' is for long."
+  },
+  {
+    q: "What does Console.ReadLine() return?",
+    opts: ["int", "bool", "string (or null)", "char"],
+    correct: 2,
+    explain: "Console.ReadLine() always returns a string (or null). Use int.TryParse() to convert to a number."
+  },
+  {
+    q: "What does $\"Hello, {name}!\" use?",
+    opts: ["String concatenation", "String interpolation", "String.Format()", "Template literals"],
+    correct: 1,
+    explain: "The $ prefix enables string interpolation, allowing expressions inside {} to be embedded directly."
+  },
+  {
+    q: "What is the result of 10 / 3 when both are int?",
+    opts: ["3.33", "3", "4", "3.0"],
+    correct: 1,
+    explain: "Integer division truncates: 10 / 3 = 3. To get 3.33, at least one operand must be float/double."
+  },
+  {
+    q: "Which operator is the null-coalescing operator?",
+    opts: ["?.", "?:", "??", "!"],
+    correct: 2,
+    explain: "?? returns the left operand if non-null, otherwise the right: value ?? \"default\""
+  },
+  {
+    q: "How do you declare a nullable integer?",
+    opts: ["int! x;", "nullable int x;", "int? x;", "int x = null;"],
+    correct: 2,
+    explain: "Add ? after the type: int? x = null; This allows a value type to hold null."
+  },
+  {
+    q: "What property gives the size of an array?",
+    opts: [".Count", ".Size", ".Length", ".Capacity"],
+    correct: 2,
+    explain: "Arrays use .Length. Lists use .Count. This is a common exam distinction."
+  },
+  {
+    q: "Which method adds an element to a List<T>?",
+    opts: [".Push()", ".Insert()", ".Add()", ".Append()"],
+    correct: 2,
+    explain: "List<T>.Add(item) appends an item to the end of the list."
+  },
+  {
+    q: "What happens when you assign a struct to a new variable?",
+    opts: ["Both point to same data", "The struct is copied", "A reference is shared", "Compilation error"],
+    correct: 1,
+    explain: "Structs are value types. Assignment copies all fields. Modifying the copy does NOT affect the original."
+  },
+  {
+    q: "By default, how are value types passed to methods in C#?",
+    opts: ["By reference", "By value (copy)", "By pointer", "By name"],
+    correct: 1,
+    explain: "Value types are passed by value (copy) by default. Use 'ref' to pass by reference."
+  },
+  {
+    q: "Where must the 'ref' keyword appear?",
+    opts: ["Only in the method signature", "Only at the call site", "Both the method signature AND the call site", "Neither - it's automatic"],
+    correct: 2,
+    explain: "ref must appear in both places: static void Change(ref int x) and Change(ref score)."
+  },
+  {
+    q: "Queue<T> follows which principle?",
+    opts: ["LIFO", "FIFO", "Random access", "Priority-based"],
+    correct: 1,
+    explain: "Queue<T> is First-In, First-Out. Use Enqueue() to add and Dequeue() to remove."
+  },
+  {
+    q: "Which loop is best when you don't know the number of iterations?",
+    opts: ["for loop", "foreach loop", "while loop", "do-while loop"],
+    correct: 2,
+    explain: "A while loop checks a condition before each iteration - ideal when the count isn't known upfront."
+  }
+];
+
+let quizAnswered = 0;
+let quizCorrect = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  quizAnswered = 0;
+  quizCorrect = 0;
+  document.getElementById('quizScore').style.display = 'none';
+
+  quizData.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-question';
+    div.id = 'qq-' + i;
+    let optionsHTML = '';
+    item.opts.forEach((opt, j) => {
+      optionsHTML += `<button class="quiz-option" onclick="answerQuiz(${i}, ${j})">${opt}</button>`;
+    });
+    div.innerHTML = `
+      <h4><span class="q-num">Q${i+1}</span> ${item.q}</h4>
+      ${optionsHTML}
+      <div class="quiz-explanation" id="qe-${i}">${item.explain}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function answerQuiz(qi, oi) {
+  const question = document.getElementById('qq-' + qi);
+  const btns = question.querySelectorAll('.quiz-option');
+  if (btns[0].classList.contains('disabled')) return;
+
+  quizAnswered++;
+  const correct = quizData[qi].correct;
+
+  btns.forEach((b, j) => {
+    b.classList.add('disabled');
+    if (j === correct) b.classList.add('correct');
+    if (j === oi && oi !== correct) b.classList.add('wrong');
+  });
+
+  if (oi === correct) quizCorrect++;
+  document.getElementById('qe-' + qi).classList.add('show');
+
+  if (quizAnswered === quizData.length) {
+    setTimeout(showQuizScore, 600);
+  }
+}
+
+function showQuizScore() {
+  const score = document.getElementById('quizScore');
+  score.style.display = 'block';
+  const pct = Math.round((quizCorrect / quizData.length) * 100);
+  document.getElementById('scoreNum').textContent = quizCorrect + ' / ' + quizData.length;
+  document.getElementById('scoreNum').style.color =
+    pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--orange)' : 'var(--red)';
+  let msg = pct >= 90 ? "Excellent! You're well prepared for the exam!" :
+            pct >= 70 ? "Good job! Review the topics you missed." :
+            pct >= 50 ? "Getting there. Revisit the flashcards and cheat sheet." :
+            "Keep studying! Use the flashcards and review each section carefully.";
+  document.getElementById('scoreMsg').textContent = msg;
+  score.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  buildQuiz();
+  document.getElementById('quizContainer').scrollIntoView({ behavior: 'smooth' });
+}
+
+buildQuiz();
+
+// =============== KEYBOARD SHORTCUTS ===============
+document.addEventListener('keydown', function(e) {
+  const active = document.querySelector('.section.active');
+  if (active && active.id === 'sec-flashcards') {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  }
+});
+</script>
+
+</body>
+</html>

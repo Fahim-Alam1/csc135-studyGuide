@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 135 - Recursion Study Guide</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --bg3: #334155;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #a78bfa;
+    --green: #4ade80;
+    --red: #f87171;
+    --orange: #fb923c;
+    --yellow: #facc15;
+    --border: #475569;
+    --code-bg: #0c1222;
+    --card: #1e293b;
+    --card-hover: #263548;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --bg2: #ffffff;
+    --bg3: #e2e8f0;
+    --text: #1e293b;
+    --text2: #64748b;
+    --border: #cbd5e1;
+    --code-bg: #f8fafc;
+    --card: #ffffff;
+    --card-hover: #f8fafc;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    transition: background 0.3s, color 0.3s;
+  }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; z-index: 100;
+    padding: 20px 0;
+    transition: transform 0.3s;
+  }
+  .sidebar.closed { transform: translateX(-280px); }
+  .sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .sidebar-header h2 { font-size: 1.1rem; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; }
+  .sidebar-header p { font-size: 0.8rem; color: var(--text2); margin-top: 4px; }
+  .nav-section {
+    padding: 8px 20px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+  }
+  .nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+  }
+  .nav-link:hover, .nav-link.active {
+    color: var(--accent);
+    background: rgba(56,189,248,0.05);
+    border-left-color: var(--accent);
+  }
+  .nav-link .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+  .search-input {
+    width: calc(100% - 40px);
+    padding: 10px 14px 10px 36px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+    margin: 10px 20px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-wrapper { position: relative; }
+  .search-icon {
+    position: absolute; left: 32px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text2); font-size: 0.9rem;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 280px;
+    padding: 30px 40px 60px;
+    max-width: 960px;
+    transition: margin-left 0.3s;
+  }
+  .main.full { margin-left: 0; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 30px;
+    position: sticky; top: 0;
+    background: var(--bg);
+    padding: 12px 0; z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .hamburger {
+    display: none;
+    background: none; border: none; color: var(--text);
+    font-size: 1.5rem; cursor: pointer;
+  }
+  .theme-toggle {
+    background: var(--bg3); border: none; color: var(--text);
+    padding: 8px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 0.85rem; transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--border); }
+  .progress-container {
+    background: var(--bg3); border-radius: 12px;
+    height: 8px; width: 200px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; border-radius: 12px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+  }
+  .progress-text { font-size: 0.8rem; color: var(--text2); margin-left: 8px; }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1 {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--accent);
+    margin: 30px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--bg3);
+  }
+  h3 { font-size: 1.1rem; color: var(--accent3); margin: 20px 0 8px; }
+  .subtitle { font-size: 1rem; color: var(--text2); margin-bottom: 24px; }
+  p { margin-bottom: 12px; color: var(--text); }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; color: var(--text); }
+
+  /* CODE */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 14px 0 20px;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block code {
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+    font-size: 0.85rem; line-height: 1.6;
+    color: var(--text); white-space: pre;
+  }
+  .code-label {
+    position: absolute; top: 8px; right: 12px;
+    font-size: 0.65rem; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text2);
+    background: var(--bg3); padding: 2px 8px; border-radius: 4px;
+  }
+  .copy-btn {
+    position: absolute; top: 8px; right: 70px;
+    background: var(--bg3); border: none; color: var(--text2);
+    padding: 2px 10px; border-radius: 4px; cursor: pointer;
+    font-size: 0.7rem; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--accent); color: #000; }
+  .kw { color: #c084fc; }
+  .tp { color: #38bdf8; }
+  .str { color: #4ade80; }
+  .cm { color: #64748b; }
+  .num { color: #fb923c; }
+  .fn { color: #facc15; }
+  .op { color: #f472b6; }
+
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px; margin: 16px 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card.clickable { cursor: pointer; }
+  .card h4 { color: var(--accent); font-size: 0.95rem; margin-bottom: 8px; }
+  .card p { font-size: 0.85rem; color: var(--text2); margin: 0; }
+  .card code {
+    font-family: 'Fira Code', monospace; font-size: 0.8rem;
+    background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: rgba(56,189,248,0.05);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+  }
+  .callout.warning { border-left-color: var(--orange); background: rgba(251,146,60,0.05); }
+  .callout.success { border-left-color: var(--green); background: rgba(74,222,128,0.05); }
+  .callout strong { color: var(--accent); }
+  .callout.warning strong { color: var(--orange); }
+  .callout.success strong { color: var(--green); }
+
+  /* TABLES */
+  .cheat-table {
+    width: 100%; border-collapse: collapse;
+    margin: 16px 0; font-size: 0.9rem;
+  }
+  .cheat-table th {
+    background: var(--bg3); padding: 10px 14px;
+    text-align: left; font-weight: 600;
+    color: var(--accent); border-bottom: 2px solid var(--border);
+  }
+  .cheat-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .cheat-table tr:hover td { background: rgba(56,189,248,0.03); }
+  .cheat-table code {
+    font-family: 'Fira Code', monospace; font-size: 0.8rem;
+    background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+  }
+
+  /* FLASHCARDS */
+  .flashcard-container { perspective: 1000px; margin: 20px 0; }
+  .flashcard {
+    width: 100%; min-height: 220px;
+    position: relative; cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute; width: 100%; min-height: 220px;
+    backface-visibility: hidden;
+    border-radius: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px; text-align: center;
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border: 1px solid var(--border);
+  }
+  .flashcard-back {
+    background: linear-gradient(135deg, #1a1a4e, #2d1b69);
+    border: 1px solid var(--accent2);
+    transform: rotateY(180deg);
+    color: #e2e8f0;
+  }
+  [data-theme="light"] .flashcard-back {
+    background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+    color: #1e293b;
+  }
+  .flashcard-front h3 { color: var(--accent); font-size: 1.2rem; }
+  .flashcard-front p { color: var(--text2); font-size: 0.85rem; margin-top: 10px; }
+  .flashcard-back p { font-size: 1rem; line-height: 1.6; }
+  .flashcard-nav {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; margin-top: 16px;
+  }
+  .flashcard-nav button {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 20px; border-radius: 8px;
+    cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+  }
+  .flashcard-nav button:hover { background: var(--accent); color: #000; }
+  .flashcard-counter { font-size: 0.85rem; color: var(--text2); }
+
+  /* QUIZ */
+  .quiz-question {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .quiz-question h4 { font-size: 1rem; margin-bottom: 14px; color: var(--text); }
+  .quiz-question .q-num {
+    display: inline-block; background: var(--accent);
+    color: #000; font-weight: 700; font-size: 0.75rem;
+    padding: 2px 8px; border-radius: 6px; margin-right: 8px;
+  }
+  .quiz-option {
+    display: block; width: 100%; text-align: left;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
+    color: var(--text); cursor: pointer; font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: rgba(56,189,248,0.05); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+  .quiz-option.disabled { pointer-events: none; }
+  .quiz-explanation {
+    display: none; margin-top: 10px; padding: 12px;
+    background: rgba(56,189,248,0.05);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem; color: var(--text2);
+  }
+  .quiz-explanation.show { display: block; }
+  .quiz-score {
+    text-align: center; padding: 30px;
+    background: var(--card); border-radius: 14px;
+    border: 1px solid var(--border);
+    margin: 20px 0; display: none;
+  }
+  .quiz-score h3 { font-size: 1.5rem; margin-bottom: 10px; }
+  .quiz-score .score-num { font-size: 3rem; font-weight: 800; }
+  .quiz-reset {
+    background: var(--accent); border: none; color: #000;
+    padding: 10px 28px; border-radius: 8px; cursor: pointer;
+    font-size: 0.95rem; font-weight: 600; margin-top: 16px;
+    transition: opacity 0.2s;
+  }
+  .quiz-reset:hover { opacity: 0.85; }
+
+  /* INTERACTIVE VISUALIZER */
+  .viz-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .viz-controls {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .viz-controls label { font-size: 0.9rem; color: var(--text2); }
+  .viz-controls input[type="number"] {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px; color: var(--text);
+    width: 80px; font-size: 0.9rem; outline: none;
+  }
+  .viz-controls input[type="number"]:focus { border-color: var(--accent); }
+  .viz-controls input[type="text"] {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px; color: var(--text);
+    width: 160px; font-size: 0.9rem; outline: none;
+  }
+  .viz-controls input[type="text"]:focus { border-color: var(--accent); }
+  .viz-btn {
+    background: var(--accent); border: none; color: #000;
+    padding: 8px 20px; border-radius: 8px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 600; transition: opacity 0.2s;
+  }
+  .viz-btn:hover { opacity: 0.85; }
+  .viz-btn.secondary {
+    background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+  }
+  .viz-output {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    min-height: 60px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .viz-output .call-line {
+    padding: 4px 0;
+    border-left: 3px solid transparent;
+    padding-left: 8px;
+    transition: all 0.3s;
+  }
+  .viz-output .call-line.entering { border-left-color: var(--accent); color: var(--accent); }
+  .viz-output .call-line.returning { border-left-color: var(--green); color: var(--green); }
+  .viz-output .call-line.base { border-left-color: var(--yellow); color: var(--yellow); }
+  .viz-output .indent { display: inline-block; }
+
+  /* TURING MACHINE SIMULATOR */
+  .tape-container {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin: 20px 0; flex-wrap: wrap;
+  }
+  .tape-cell {
+    width: 50px; height: 50px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.2rem; font-weight: 700;
+    color: var(--text);
+    transition: all 0.3s;
+    background: var(--bg);
+  }
+  .tape-cell.active {
+    border-color: var(--accent);
+    background: rgba(56,189,248,0.15);
+    box-shadow: 0 0 12px rgba(56,189,248,0.3);
+  }
+  .tape-cell.flipped {
+    background: rgba(74,222,128,0.1);
+    color: var(--green);
+  }
+  .tm-state {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--accent);
+    margin: 12px 0;
+    font-weight: 600;
+  }
+  .tm-rules {
+    margin: 16px 0;
+    padding: 14px 18px;
+    background: var(--code-bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 2;
+  }
+  .tm-rules .rule-active { color: var(--green); font-weight: 700; }
+
+  /* CALL STACK VISUAL */
+  .stack-visual {
+    display: flex; flex-direction: column-reverse;
+    align-items: center; gap: 4px;
+    margin: 20px 0;
+  }
+  .stack-frame {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    text-align: center;
+    min-width: 200px;
+    animation: stackPush 0.3s ease;
+  }
+  @keyframes stackPush {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-280px); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 20px; }
+    .hamburger { display: block; }
+    .progress-container { width: 120px; }
+    h1 { font-size: 1.5rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    .tape-cell { width: 40px; height: 40px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>CSC 135</h2>
+    <p>Recursion Study Guide</p>
+  </div>
+  <div class="search-wrapper">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search topics...">
+  </div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-link active" data-section="overview" onclick="showSection('overview')">
+    <span class="icon">&#127968;</span> Overview
+  </a>
+  <div class="nav-section">Turing Machines</div>
+  <a class="nav-link" data-section="turing" onclick="showSection('turing')">
+    <span class="icon">&#9881;</span> Turing Machines
+  </a>
+  <a class="nav-link" data-section="flipper" onclick="showSection('flipper')">
+    <span class="icon">&#128301;</span> The Flipper Problem
+  </a>
+  <a class="nav-link" data-section="church" onclick="showSection('church')">
+    <span class="icon">&#9962;</span> Church-Turing Thesis
+  </a>
+  <div class="nav-section">Recursion</div>
+  <a class="nav-link" data-section="factorial" onclick="showSection('factorial')">
+    <span class="icon">&#10071;</span> Factorial
+  </a>
+  <a class="nav-link" data-section="definition" onclick="showSection('definition')">
+    <span class="icon">&#128214;</span> Formal Definition
+  </a>
+  <a class="nav-link" data-section="climber" onclick="showSection('climber')">
+    <span class="icon">&#129406;</span> Lazy Climber
+  </a>
+  <a class="nav-link" data-section="palindrome" onclick="showSection('palindrome')">
+    <span class="icon">&#128260;</span> Palindrome Oracle
+  </a>
+  <a class="nav-link" data-section="why" onclick="showSection('why')">
+    <span class="icon">&#10067;</span> Why Recursion?
+  </a>
+  <a class="nav-link" data-section="tail" onclick="showSection('tail')">
+    <span class="icon">&#128007;</span> Tail Recursion
+  </a>
+  <a class="nav-link" data-section="quine" onclick="showSection('quine')">
+    <span class="icon">&#128257;</span> Self-Reproduction
+  </a>
+  <div class="nav-section">Study Tools</div>
+  <a class="nav-link" data-section="flashcards" onclick="showSection('flashcards')">
+    <span class="icon">&#127183;</span> Flashcards
+  </a>
+  <a class="nav-link" data-section="cheatsheet" onclick="showSection('cheatsheet')">
+    <span class="icon">&#128203;</span> Cheat Sheet
+  </a>
+  <a class="nav-link" data-section="quiz" onclick="showSection('quiz')">
+    <span class="icon">&#127919;</span> Practice Quiz
+  </a>
+</nav>
+
+<div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;" onclick="toggleSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+      <div class="progress-container"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <span class="progress-text" id="progressText">0 / 9 topics</span>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">&#9790; Dark</button>
+    </div>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="section active" id="sec-overview">
+    <h1>Recursion Study Guide</h1>
+    <p class="subtitle">CSC 135 &mdash; Turing Machines, Recursion, and Self-Reproduction</p>
+    <div class="callout">
+      <strong>Exam Prep:</strong> This guide covers Turing machines, the Church-Turing thesis, recursion (factorial, staircase, palindrome), tail recursion, and quines. Includes interactive visualizers, flashcards, and a practice quiz.
+    </div>
+    <h2>Topics Covered</h2>
+    <div class="card-grid">
+      <div class="card clickable" onclick="showSection('turing')">
+        <h4>&#9881; Turing Machines</h4>
+        <p>Mathematical model of computation invented by Alan Turing in 1936.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('flipper')">
+        <h4>&#128301; The Flipper Problem</h4>
+        <p>Interactive Turing machine that flips 0s to 1s on a tape.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('church')">
+        <h4>&#9962; Church-Turing Thesis</h4>
+        <p>Anything computable can be computed by a Turing Machine.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('factorial')">
+        <h4>&#10071; Factorial</h4>
+        <p>The classic recursive function with an interactive call stack visualizer.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('climber')">
+        <h4>&#129406; The Lazy Climber</h4>
+        <p>Fibonacci-style recursion: how many ways to climb N stairs?</p>
+      </div>
+      <div class="card clickable" onclick="showSection('palindrome')">
+        <h4>&#128260; Palindrome Oracle</h4>
+        <p>Recursive palindrome checking by stripping ends.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('tail')">
+        <h4>&#128007; Tail Recursion</h4>
+        <p>When the recursive call is the last operation &mdash; can be optimized to a loop.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('quine')">
+        <h4>&#128257; Self-Reproduction &amp; Quines</h4>
+        <p>Programs that output their own source code.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TURING MACHINES ===== -->
+  <div class="section" id="sec-turing">
+    <h1>Turing Machines</h1>
+    <p class="subtitle">A mathematical model of computation (Alan Turing, 1936)</p>
+
+    <h2>What is a Turing Machine?</h2>
+    <ul>
+      <li>A <strong>mathematical model</strong> of computation</li>
+      <li>Invented by <strong>Alan Turing</strong>, a British mathematician, in <strong>1936</strong></li>
+      <li>The challenge: create a "mechanical procedure" to answer any mathematical statement as "yes" or "no"</li>
+      <li>Turing imagined a machine that could perform <strong>any conceivable mathematical calculation</strong>, given enough time and instructions</li>
+    </ul>
+
+    <h2>Components of a Turing Machine</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Tape</h4>
+        <p>An infinite strip divided into cells, each holding a symbol (0, 1, or blank). The machine's memory.</p>
+      </div>
+      <div class="card">
+        <h4>Head</h4>
+        <p>A read/write head that sits on one cell at a time. It can read the symbol, write a new symbol, and move left or right.</p>
+      </div>
+      <div class="card">
+        <h4>State Register</h4>
+        <p>The machine's current state (e.g., q_flip, q_halt). Determines which rule to follow.</p>
+      </div>
+      <div class="card">
+        <h4>Transition Rules</h4>
+        <p>A table of rules: given the current state + symbol, write a symbol, move the head, and change state.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Rule Format:</strong> <code>CurrentState &mdash; Read/Write, Direction &mdash; NextState</code><br>
+      Example: <code>q_flip &mdash; 0/1, R &mdash; q_flip</code> means "In state q_flip, if you read 0, write 1, move Right, stay in q_flip."
+    </div>
+  </div>
+
+  <!-- ===== FLIPPER PROBLEM ===== -->
+  <div class="section" id="sec-flipper">
+    <h1>The Flipper Problem</h1>
+    <p class="subtitle">A simple Turing Machine that flips all 0s to 1s</p>
+
+    <h2>The Setup</h2>
+    <ul>
+      <li><strong>Tape:</strong> 0 0 0 (followed by blank spaces forever)</li>
+      <li><strong>Starting State:</strong> q_flip (the "working" state)</li>
+    </ul>
+
+    <h2>The Rules</h2>
+    <div class="tm-rules" id="tmRules">
+      <div id="rule1"><strong>Rule 1:</strong> q_flip &mdash; 0/1, R &mdash; q_flip &nbsp;&nbsp;<em>(read 0, write 1, move right, stay in q_flip)</em></div>
+      <div id="rule2"><strong>Rule 2:</strong> q_flip &mdash; B/B, R &mdash; q_halt &nbsp;&nbsp;<em>(read blank, keep blank, move right, halt)</em></div>
+      <div id="rule3"><strong>Rule 3:</strong> q_flip &mdash; 1/1, R &mdash; q_flip &nbsp;&nbsp;<em>(read 1, keep 1, move right, stay in q_flip)</em></div>
+    </div>
+
+    <div class="callout warning">
+      <strong>The Missing Rule:</strong> Rule 3 was initially missing from the problem! Without it, the machine wouldn't know what to do if it encountered a 1 already on the tape. This teaches us: <em>every possible input must have a rule</em>.
+    </div>
+
+    <h2>Interactive Simulator</h2>
+    <div class="viz-container">
+      <div class="viz-controls">
+        <button class="viz-btn" onclick="tmReset()">Reset</button>
+        <button class="viz-btn" onclick="tmStep()">Step</button>
+        <button class="viz-btn secondary" onclick="tmAutoRun()">Auto Run</button>
+      </div>
+      <div class="tm-state" id="tmState">State: q_flip | Head Position: 0</div>
+      <div class="tape-container" id="tapeContainer"></div>
+      <div id="tmLog" style="margin-top:12px; font-size:0.85rem; color:var(--text2);"></div>
+    </div>
+  </div>
+
+  <!-- ===== CHURCH-TURING THESIS ===== -->
+  <div class="section" id="sec-church">
+    <h1>Church-Turing Thesis</h1>
+    <p class="subtitle">The fundamental claim about the limits of computation</p>
+
+    <div class="callout success">
+      <strong>The Thesis:</strong> Anything that is computable (calculation, logic, rendering graphics, running AI) can be done by a Turing Machine.
+    </div>
+
+    <h2>Key Implications</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>1. Universality</h4>
+        <p>Your laptop, phone, and a smart fridge are all mathematically equivalent to a Turing Machine. They are just <strong>faster</strong>.</p>
+      </div>
+      <div class="card">
+        <h4>2. Limits of Computation</h4>
+        <p>If we can prove a Turing Machine <strong>cannot</strong> solve a problem, then <strong>no physical computer</strong> will ever solve it either.</p>
+      </div>
+    </div>
+
+    <h2>Why It Matters</h2>
+    <ul>
+      <li>Gave us the <strong>blueprint of the modern general-purpose computer</strong></li>
+      <li>Proved that some problems are <strong>undecidable</strong> (no algorithm can solve them)</li>
+      <li>Turing is widely considered the <strong>father of theoretical computer science and AI</strong></li>
+    </ul>
+
+    <h2>The Halting Problem</h2>
+    <div class="callout warning">
+      <strong>Undecidable:</strong> A machine can <em>never</em> predict if an arbitrary program will eventually stop (halt) or keep running forever. This is the <strong>Halting Problem</strong> &mdash; it has been mathematically proven to be unsolvable.
+    </div>
+
+    <h2>Connection to Recursion</h2>
+    <p>The Church-Turing Thesis tells us: <strong>anything computable by a Turing Machine can be computed using recursive functions</strong>. This is why recursion is a fundamental concept &mdash; it's mathematically equivalent to what any computer can do.</p>
+  </div>
+
+  <!-- ===== FACTORIAL ===== -->
+  <div class="section" id="sec-factorial">
+    <h1>Factorial (Recursion)</h1>
+    <p class="subtitle">The classic example: n! = n &times; (n-1) &times; ... &times; 2 &times; 1</p>
+
+    <h2>The Problem</h2>
+    <p><strong>5!</strong> = 1 &times; 2 &times; 3 &times; 4 &times; 5 = <strong>120</strong></p>
+
+    <h2>Recursive Solution</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static</span> <span class="tp">int</span> <span class="fn">Factorial</span>(<span class="tp">int</span> n)
+{
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Calculating factorial of {n}"</span>);
+    <span class="tp">int</span> result;
+
+    <span class="kw">if</span> (n == <span class="num">1</span>) {
+        result = <span class="num">1</span>;                        <span class="cm">// Base case</span>
+    } <span class="kw">else</span> {
+        <span class="tp">int</span> previousFactorial = <span class="fn">Factorial</span>(n - <span class="num">1</span>);  <span class="cm">// Recursive step</span>
+        result = previousFactorial * n;
+    }
+
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"Factorial of {n} is {result}"</span>);
+    <span class="kw">return</span> result;
+}</code>
+    </div>
+
+    <div class="callout">
+      <strong>Two Parts:</strong>
+      <ul style="margin-top:8px;">
+        <li><strong>Base Case (n == 1):</strong> Returns 1 directly &mdash; stops the recursion</li>
+        <li><strong>Recursive Step:</strong> Calls Factorial(n - 1) then multiplies by n</li>
+      </ul>
+    </div>
+
+    <h2>Interactive Call Stack Visualizer</h2>
+    <div class="viz-container">
+      <div class="viz-controls">
+        <label>n =</label>
+        <input type="number" id="factInput" value="5" min="1" max="12">
+        <button class="viz-btn" onclick="runFactorial()">Run Factorial</button>
+        <button class="viz-btn secondary" onclick="stepFactorial()">Step Through</button>
+        <button class="viz-btn secondary" onclick="resetFactorial()">Reset</button>
+      </div>
+      <div class="viz-output" id="factOutput">
+        <div style="color:var(--text2);">Click "Run Factorial" or "Step Through" to visualize.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FORMAL DEFINITION ===== -->
+  <div class="section" id="sec-definition">
+    <h1>Formal Definition of Recursion</h1>
+    <p class="subtitle">"Reduction to Simplicity"</p>
+
+    <div class="callout success">
+      <strong>Recursion</strong> is a technique where a function solves a problem by calling itself with a <em>simpler</em> version of the same problem, until it reaches a case simple enough to solve directly.
+    </div>
+
+    <h2>Two Required Parts</h2>
+    <div class="card-grid">
+      <div class="card" style="border-left: 4px solid var(--yellow);">
+        <h4>1. The Base Case (Halting State)</h4>
+        <p>The simplest version of the problem that can be answered directly <strong>without recursion</strong>. This is what stops the recursion from going forever.</p>
+        <p style="margin-top:8px;"><code>if (n == 1) return 1;</code></p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h4>2. The Recursive Step (Reduction)</h4>
+        <p>The function calls itself with a <strong>smaller / simpler</strong> input, making progress toward the base case.</p>
+        <p style="margin-top:8px;"><code>return n * Factorial(n - 1);</code></p>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>Without a Base Case:</strong> The recursion never stops, causing a <code>StackOverflowException</code>. Without reduction toward the base case, same problem &mdash; infinite loop. <em>Both</em> parts are essential.
+    </div>
+
+    <h2>How to Think About Recursion</h2>
+    <ol>
+      <li><strong>Trust the function:</strong> Assume the recursive call returns the correct answer for the smaller problem</li>
+      <li><strong>Build from there:</strong> Use that answer to construct the answer for the current problem</li>
+      <li><strong>Define the base:</strong> Identify the simplest case where you know the answer immediately</li>
+    </ol>
+  </div>
+
+  <!-- ===== LAZY CLIMBER ===== -->
+  <div class="section" id="sec-climber">
+    <h1>The Lazy Climber Problem</h1>
+    <p class="subtitle">How many distinct ways to climb N stairs taking 1 or 2 steps at a time?</p>
+
+    <h2>The Problem</h2>
+    <p>You are at the bottom of a staircase with <strong>N steps</strong>. You can climb either <strong>1 step</strong> or <strong>2 steps</strong> at a time. How many distinct ways can you reach the top?</p>
+
+    <h3>Example: N = 3</h3>
+    <ul>
+      <li>1-1-1 (three single steps)</li>
+      <li>1-2 (one step, then two steps)</li>
+      <li>2-1 (two steps, then one step)</li>
+    </ul>
+    <p><strong>Answer: 3 ways</strong></p>
+
+    <h2>The Key Insight</h2>
+    <div class="callout">
+      <strong>Ways(n) = Ways(n-1) + Ways(n-2)</strong><br>
+      To reach step N, you either came from step N-1 (took 1 step) or step N-2 (took 2 steps). So the total ways equals the sum of ways to reach each of those steps. This is the <strong>Fibonacci sequence</strong>!
+    </div>
+
+    <h2>Recursive Solution</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static</span> <span class="tp">int</span> <span class="fn">LazyClimberRecursive</span>(<span class="tp">int</span> n)
+{
+    <span class="tp">int</span> retVal;
+    <span class="kw">if</span> (n <= <span class="num">0</span>) {
+        retVal = <span class="num">0</span>;
+    } <span class="kw">else if</span> (n == <span class="num">1</span>) {
+        retVal = <span class="num">1</span>;   <span class="cm">// base case: 1 way to climb 1 step</span>
+    } <span class="kw">else if</span> (n == <span class="num">2</span>) {
+        retVal = <span class="num">2</span>;   <span class="cm">// base case: 2 ways to climb 2 steps (1+1 or 2)</span>
+    } <span class="kw">else</span> {
+        retVal = <span class="fn">LazyClimberRecursive</span>(n - <span class="num">1</span>) + <span class="fn">LazyClimberRecursive</span>(n - <span class="num">2</span>);
+    }
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(<span class="str">$"LazyClimberRecursive({n}) = {retVal}"</span>);
+    <span class="kw">return</span> retVal;
+}</code>
+    </div>
+
+    <h2>Interactive Visualizer</h2>
+    <div class="viz-container">
+      <div class="viz-controls">
+        <label>Stairs (n) =</label>
+        <input type="number" id="climbInput" value="5" min="1" max="10">
+        <button class="viz-btn" onclick="runClimber()">Calculate</button>
+      </div>
+      <div class="viz-output" id="climbOutput">
+        <div style="color:var(--text2);">Click "Calculate" to see the result and call tree.</div>
+      </div>
+    </div>
+
+    <h2>Values Table</h2>
+    <table class="cheat-table">
+      <tr><th>n (stairs)</th><th>Ways(n)</th><th>How</th></tr>
+      <tr><td>1</td><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td>2</td><td>1+1, 2</td></tr>
+      <tr><td>3</td><td>3</td><td>Ways(2)+Ways(1) = 2+1</td></tr>
+      <tr><td>4</td><td>5</td><td>Ways(3)+Ways(2) = 3+2</td></tr>
+      <tr><td>5</td><td>8</td><td>Ways(4)+Ways(3) = 5+3</td></tr>
+      <tr><td>6</td><td>13</td><td>Ways(5)+Ways(4) = 8+5</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== PALINDROME ===== -->
+  <div class="section" id="sec-palindrome">
+    <h1>The Palindrome Oracle</h1>
+    <p class="subtitle">Recursively checking if a word reads the same forwards and backwards</p>
+
+    <h2>The Problem</h2>
+    <p>You can only see the <strong>first and last letter</strong> of a word. Determine if it's a palindrome by stripping off the ends.</p>
+
+    <h2>Recursive Solution</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static</span> <span class="tp">bool</span> <span class="fn">IsPalindrome</span>(<span class="tp">string</span> s, <span class="tp">int</span> left, <span class="tp">int</span> right)
+{
+    <span class="kw">if</span> (left >= right) <span class="kw">return</span> <span class="kw">true</span>;        <span class="cm">// Base case: 0 or 1 chars left</span>
+    <span class="kw">if</span> (s[left] != s[right]) <span class="kw">return</span> <span class="kw">false</span>; <span class="cm">// Mismatch found</span>
+    <span class="kw">return</span> <span class="fn">IsPalindrome</span>(s, left + <span class="num">1</span>, right - <span class="num">1</span>); <span class="cm">// Strip ends, recurse</span>
+}</code>
+    </div>
+
+    <h2>How It Works: "RACECAR"</h2>
+    <table class="cheat-table">
+      <tr><th>Call</th><th>Left</th><th>Right</th><th>Compare</th><th>Result</th></tr>
+      <tr><td>1st</td><td>0 (R)</td><td>6 (R)</td><td>R == R</td><td>Match, continue</td></tr>
+      <tr><td>2nd</td><td>1 (A)</td><td>5 (A)</td><td>A == A</td><td>Match, continue</td></tr>
+      <tr><td>3rd</td><td>2 (C)</td><td>4 (C)</td><td>C == C</td><td>Match, continue</td></tr>
+      <tr><td>4th</td><td>3 (E)</td><td>3 (E)</td><td>left >= right</td><td>Base case: true!</td></tr>
+    </table>
+
+    <h2>Interactive Palindrome Checker</h2>
+    <div class="viz-container">
+      <div class="viz-controls">
+        <label>Word:</label>
+        <input type="text" id="palindromeInput" value="RACECAR" style="text-transform:uppercase;">
+        <button class="viz-btn" onclick="runPalindrome()">Check</button>
+      </div>
+      <div class="viz-output" id="palindromeOutput">
+        <div style="color:var(--text2);">Enter a word and click "Check" to see the recursive trace.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Base Cases:</strong>
+      <ul style="margin-top:8px;">
+        <li><code>left >= right</code> &rarr; 0 or 1 characters remain &rarr; it's a palindrome (return true)</li>
+        <li><code>s[left] != s[right]</code> &rarr; mismatch found &rarr; not a palindrome (return false)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== WHY RECURSION ===== -->
+  <div class="section" id="sec-why">
+    <h1>Why Recursion Matters</h1>
+    <p class="subtitle">More than just a programming trick &mdash; it's fundamental to computation</p>
+
+    <div class="card-grid">
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h4>Church-Turing Connection</h4>
+        <p>Anything computable by a Turing Machine can be computed using <strong>recursive functions</strong>. They are equivalent models of computation.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent2);">
+        <h4>Native Language of Math</h4>
+        <p>Recursion is the "native language" of mathematical models. Many definitions in math are inherently recursive (factorials, Fibonacci, tree structures).</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent3);">
+        <h4>Beyond Iteration</h4>
+        <p>Some functions are so complex that they <strong>cannot be solved with iterations alone</strong>. Recursive solutions can express these naturally.</p>
+      </div>
+    </div>
+
+    <div class="callout success">
+      <strong>Key Takeaway:</strong> Recursion isn't just an alternative to loops &mdash; it's a fundamental computational concept that's mathematically equivalent to what any computer can do. Understanding recursion means understanding the nature of computation itself.
+    </div>
+  </div>
+
+  <!-- ===== TAIL RECURSION ===== -->
+  <div class="section" id="sec-tail">
+    <h1>Tail-End Recursion</h1>
+    <p class="subtitle">When the recursive call is the very last thing a function does</p>
+
+    <h2>What is Tail Recursion?</h2>
+    <p>A recursive function is <strong>tail-recursive</strong> if the recursive call is the <strong>last operation</strong> performed. There's no work left to do after the call returns.</p>
+
+    <h2>Example: Print Numbers</h2>
+    <div class="code-block">
+      <span class="code-label">C# - Tail Recursive</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static void</span> <span class="fn">PrintNumbers</span>(<span class="tp">int</span> n)
+{
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return</span>;         <span class="cm">// Base case</span>
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(n);
+    <span class="fn">PrintNumbers</span>(n - <span class="num">1</span>);        <span class="cm">// Last thing - tail position!</span>
+}</code>
+    </div>
+
+    <h2>Equivalent Iterative Version</h2>
+    <div class="code-block">
+      <span class="code-label">C# - Iterative with goto</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">static void</span> <span class="fn">PrintNumbersIterative</span>(<span class="tp">int</span> n)
+{
+    begin:
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return</span>;
+    <span class="tp">Console</span>.<span class="fn">WriteLine</span>(n);
+    n = n - <span class="num">1</span>;
+    <span class="kw">goto</span> begin;
+}</code>
+    </div>
+
+    <div class="callout">
+      <strong>Key Insight:</strong> A tail-recursive function can be mechanically converted to a loop. The compiler can optimize it so it uses <strong>constant stack space</strong> instead of growing the call stack. This optimization is called <strong>tail-call optimization (TCO)</strong>.
+    </div>
+
+    <h2>Tail vs Non-Tail Recursion</h2>
+    <table class="cheat-table">
+      <tr><th>Feature</th><th>Tail Recursive</th><th>Non-Tail Recursive</th></tr>
+      <tr><td>Recursive call position</td><td>Last operation</td><td>More work after the call</td></tr>
+      <tr><td>Stack usage</td><td>Can be O(1) with TCO</td><td>O(n) &mdash; grows with depth</td></tr>
+      <tr><td>Convertible to loop?</td><td>Yes, mechanically</td><td>Not directly</td></tr>
+      <tr><td>Example</td><td><code>PrintNumbers(n-1)</code></td><td><code>n * Factorial(n-1)</code></td></tr>
+    </table>
+
+    <div class="callout warning">
+      <strong>Why Factorial is NOT tail-recursive:</strong> In <code>return n * Factorial(n-1)</code>, after the recursive call returns, we still need to multiply by <code>n</code>. That multiplication happens <em>after</em> the recursive call, so it's not in tail position.
+    </div>
+  </div>
+
+  <!-- ===== SELF-REPRODUCTION / QUINES ===== -->
+  <div class="section" id="sec-quine">
+    <h1>Self-Reproduction &amp; Quines</h1>
+    <p class="subtitle">Can machines reproduce themselves? Programs that output their own source code.</p>
+
+    <h2>Can Machines Self-Reproduce?</h2>
+    <p>A self-reproducible program has two parts:</p>
+    <div class="card-grid">
+      <div class="card" style="border-left: 4px solid var(--yellow);">
+        <h4>The Blueprint (Data)</h4>
+        <p>A set of instructions that describes how to build something.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h4>The Factory (Mechanism)</h4>
+        <p>The part that takes a blueprint and actually builds the object.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Key Insight:</strong> To self-reproduce, the "Factory" needs to use the "Blueprint" <strong>twice</strong>:
+      <ol style="margin-top:8px;">
+        <li>Once to build the output (using the blueprint as instructions)</li>
+        <li>Once to copy the blueprint itself (using it as data)</li>
+      </ol>
+    </div>
+
+    <h2>Quine (named after Willard Van Orman Quine)</h2>
+    <p>A <strong>quine</strong> is a program that takes no input and produces its own source code as output.</p>
+
+    <div class="code-block">
+      <span class="code-label">C</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="cm">/* The Blueprint: This string contains the source code,
+   with %s where the string itself will go. */</span>
+<span class="tp">char</span> *s = <span class="str">"#include &lt;stdio.h&gt;%cint main() { %c char *s = %c%s%c;"
+          " %c printf(s, 10, 10, 34, s, 34, 10, 10);"
+          " %c return 0; %c}"</span>;
+
+<span class="cm">/* The Factory: Using the blueprint twice. */</span>
+<span class="fn">printf</span>(s, <span class="num">10</span>, <span class="num">10</span>, <span class="num">34</span>, s, <span class="num">34</span>, <span class="num">10</span>, <span class="num">10</span>);</code>
+    </div>
+
+    <div class="callout success">
+      <strong>Key Takeaway:</strong> Self-reproduction isn't magic &mdash; it's about a clever split between <strong>data and execution</strong>. As long as a program can treat its own code as data, it can replicate itself perfectly. This principle connects to biology (DNA = blueprint, cell = factory) and to theoretical computer science.
+    </div>
+  </div>
+
+  <!-- ===== FLASHCARDS ===== -->
+  <div class="section" id="sec-flashcards">
+    <h1>Flashcards</h1>
+    <p class="subtitle">Click to flip. Arrow keys or buttons to navigate.</p>
+    <div class="flashcard-container">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-front">
+          <h3 id="fc-question"></h3>
+          <p>Click to reveal answer</p>
+        </div>
+        <div class="flashcard-back">
+          <p id="fc-answer"></p>
+        </div>
+      </div>
+    </div>
+    <div class="flashcard-nav">
+      <button onclick="prevCard()">&#9664; Prev</button>
+      <span class="flashcard-counter" id="fc-counter">1 / 20</span>
+      <button onclick="nextCard()">Next &#9654;</button>
+      <button onclick="shuffleCards()">&#128256; Shuffle</button>
+    </div>
+  </div>
+
+  <!-- ===== CHEAT SHEET ===== -->
+  <div class="section" id="sec-cheatsheet">
+    <h1>Cheat Sheet</h1>
+    <p class="subtitle">Quick reference for exam day</p>
+
+    <h2>Turing Machines</h2>
+    <table class="cheat-table">
+      <tr><th>Concept</th><th>Definition</th></tr>
+      <tr><td>Turing Machine</td><td>Mathematical model of computation (1936, Alan Turing)</td></tr>
+      <tr><td>Components</td><td>Tape (memory), Head (read/write), State Register, Transition Rules</td></tr>
+      <tr><td>Rule Format</td><td><code>State &mdash; Read/Write, Direction &mdash; NextState</code></td></tr>
+      <tr><td>Church-Turing Thesis</td><td>Anything computable can be computed by a Turing Machine</td></tr>
+      <tr><td>Halting Problem</td><td>Impossible to predict if an arbitrary program will halt &mdash; undecidable</td></tr>
+    </table>
+
+    <h2>Recursion Essentials</h2>
+    <table class="cheat-table">
+      <tr><th>Part</th><th>Description</th><th>Example (Factorial)</th></tr>
+      <tr><td>Base Case</td><td>Simplest case, answered directly, stops recursion</td><td><code>if (n == 1) return 1;</code></td></tr>
+      <tr><td>Recursive Step</td><td>Calls itself with smaller input</td><td><code>return n * Factorial(n-1);</code></td></tr>
+    </table>
+
+    <h2>Key Recursive Functions</h2>
+    <table class="cheat-table">
+      <tr><th>Problem</th><th>Formula</th><th>Base Case(s)</th></tr>
+      <tr><td>Factorial</td><td><code>n! = n * (n-1)!</code></td><td><code>1! = 1</code></td></tr>
+      <tr><td>Lazy Climber</td><td><code>Ways(n) = Ways(n-1) + Ways(n-2)</code></td><td><code>Ways(1)=1, Ways(2)=2</code></td></tr>
+      <tr><td>Palindrome</td><td><code>IsPalin(s,l,r) = s[l]==s[r] && IsPalin(s,l+1,r-1)</code></td><td><code>l >= r &rarr; true</code></td></tr>
+    </table>
+
+    <h2>Tail Recursion</h2>
+    <table class="cheat-table">
+      <tr><th>Feature</th><th>Tail Recursive</th><th>Non-Tail</th></tr>
+      <tr><td>Recursive call</td><td>Last operation</td><td>More work after</td></tr>
+      <tr><td>Stack</td><td>O(1) with TCO</td><td>O(n)</td></tr>
+      <tr><td>Loop equivalent?</td><td>Yes</td><td>Not directly</td></tr>
+    </table>
+
+    <h2>Self-Reproduction (Quines)</h2>
+    <table class="cheat-table">
+      <tr><th>Part</th><th>Role</th></tr>
+      <tr><td>Blueprint (Data)</td><td>Describes how to build the output</td></tr>
+      <tr><td>Factory (Mechanism)</td><td>Reads the blueprint and builds</td></tr>
+      <tr><td>Key Trick</td><td>Use the blueprint TWICE: once as instructions, once as data</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== QUIZ ===== -->
+  <div class="section" id="sec-quiz">
+    <h1>Practice Quiz</h1>
+    <p class="subtitle">Test your knowledge &mdash; 15 questions covering all topics</p>
+    <div id="quizContainer"></div>
+    <div class="quiz-score" id="quizScore">
+      <h3>Quiz Complete!</h3>
+      <div class="score-num" id="scoreNum"></div>
+      <p id="scoreMsg"></p>
+      <button class="quiz-reset" onclick="resetQuiz()">Retake Quiz</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ======== NAVIGATION ========
+const visited = new Set(['overview']);
+const topicSections = ['turing','flipper','church','factorial','definition','climber','palindrome','why','tail'];
+const totalTopics = topicSections.length;
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector(`.nav-link[data-section="${id}"]`);
+  if (link) link.classList.add('active');
+  visited.add(id);
+  updateProgress();
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').style.display = 'none';
+  }
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  const done = topicSections.filter(t => visited.has(t)).length;
+  const pct = Math.round((done / totalTopics) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = done + ' / ' + totalTopics + ' topics';
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  if (window.innerWidth <= 768) {
+    sb.classList.toggle('open');
+    ov.style.display = sb.classList.contains('open') ? 'block' : 'none';
+  } else {
+    sb.classList.toggle('closed');
+    document.getElementById('main').classList.toggle('full');
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.getAttribute('data-theme') === 'light';
+  document.body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  document.getElementById('themeBtn').innerHTML = isLight ? '&#9790; Dark' : '&#9788; Light';
+  localStorage.setItem('theme-recursion', isLight ? 'dark' : 'light');
+}
+(function() {
+  const saved = localStorage.getItem('theme-recursion');
+  if (saved === 'light') {
+    document.body.setAttribute('data-theme', 'light');
+    document.getElementById('themeBtn').innerHTML = '&#9788; Light';
+  }
+})();
+
+function copyCode(btn) {
+  const code = btn.parentElement.querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.style.display = link.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+
+// ======== TURING MACHINE SIMULATOR ========
+let tmTape, tmHead, tmState2, tmRunning;
+
+function tmReset() {
+  tmTape = ['0', '0', '0', 'B', 'B', 'B', 'B'];
+  tmHead = 0;
+  tmState2 = 'q_flip';
+  tmRunning = false;
+  renderTape();
+  document.getElementById('tmLog').innerHTML = '';
+  document.querySelectorAll('.tm-rules div').forEach(d => d.classList && d.classList.remove('rule-active'));
+}
+
+function renderTape() {
+  const container = document.getElementById('tapeContainer');
+  container.innerHTML = '';
+  tmTape.forEach((cell, i) => {
+    const div = document.createElement('div');
+    div.className = 'tape-cell';
+    if (i === tmHead) div.classList.add('active');
+    if (cell === '1') div.classList.add('flipped');
+    div.textContent = cell;
+    container.appendChild(div);
+  });
+  document.getElementById('tmState').textContent =
+    `State: ${tmState2} | Head Position: ${tmHead}`;
+}
+
+function tmStep() {
+  if (tmState2 === 'q_halt') {
+    document.getElementById('tmLog').innerHTML += '<div style="color:var(--green);">Machine halted!</div>';
+    return;
+  }
+  const read = tmTape[tmHead];
+  const log = document.getElementById('tmLog');
+  document.querySelectorAll('.tm-rules div').forEach(d => d.classList.remove('rule-active'));
+
+  if (read === '0') {
+    tmTape[tmHead] = '1';
+    document.getElementById('rule1').classList.add('rule-active');
+    log.innerHTML += `<div>Rule 1: Read 0, Write 1, Move R, Stay q_flip</div>`;
+  } else if (read === '1') {
+    document.getElementById('rule3').classList.add('rule-active');
+    log.innerHTML += `<div>Rule 3: Read 1, Keep 1, Move R, Stay q_flip</div>`;
+  } else if (read === 'B') {
+    tmState2 = 'q_halt';
+    document.getElementById('rule2').classList.add('rule-active');
+    log.innerHTML += `<div style="color:var(--green);">Rule 2: Read B, Keep B, HALT!</div>`;
+    renderTape();
+    return;
+  }
+  tmHead++;
+  renderTape();
+}
+
+function tmAutoRun() {
+  if (tmRunning) return;
+  tmReset();
+  tmRunning = true;
+  let step = 0;
+  const interval = setInterval(() => {
+    if (tmState2 === 'q_halt' || step > 10) {
+      clearInterval(interval);
+      tmRunning = false;
+      return;
+    }
+    tmStep();
+    step++;
+  }, 700);
+}
+
+tmReset();
+
+// ======== FACTORIAL VISUALIZER ========
+let factSteps = [];
+let factStepIndex = 0;
+
+function generateFactorialSteps(n) {
+  const steps = [];
+  function buildSteps(val, depth) {
+    steps.push({ type: 'call', n: val, depth });
+    if (val === 1) {
+      steps.push({ type: 'base', n: val, depth, result: 1 });
+    } else {
+      buildSteps(val - 1, depth + 1);
+      const prev = val === 2 ? 1 : steps.filter(s => s.type === 'return' && s.n === val - 1)[0]?.result || 1;
+      let result = 1;
+      for (let i = 1; i <= val; i++) result *= i;
+      steps.push({ type: 'return', n: val, depth, result });
+    }
+  }
+  buildSteps(n, 0);
+  return steps;
+}
+
+function runFactorial() {
+  const n = Math.min(12, Math.max(1, parseInt(document.getElementById('factInput').value) || 5));
+  const output = document.getElementById('factOutput');
+  output.innerHTML = '';
+
+  const steps = generateFactorialSteps(n);
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= steps.length) { clearInterval(interval); return; }
+    const s = steps[i];
+    const indent = '&nbsp;&nbsp;'.repeat(s.depth);
+    const div = document.createElement('div');
+    div.className = 'call-line';
+    if (s.type === 'call') {
+      div.classList.add('entering');
+      div.innerHTML = `<span class="indent">${indent}</span>&#9654; Factorial(${s.n})`;
+    } else if (s.type === 'base') {
+      div.classList.add('base');
+      div.innerHTML = `<span class="indent">${indent}</span>&#9733; Base case: Factorial(1) = 1`;
+    } else {
+      div.classList.add('returning');
+      div.innerHTML = `<span class="indent">${indent}</span>&#9664; Factorial(${s.n}) = ${s.result}`;
+    }
+    output.appendChild(div);
+    output.scrollTop = output.scrollHeight;
+    i++;
+  }, 400);
+}
+
+function stepFactorial() {
+  const n = Math.min(12, Math.max(1, parseInt(document.getElementById('factInput').value) || 5));
+  if (factSteps.length === 0 || factStepIndex >= factSteps.length) {
+    factSteps = generateFactorialSteps(n);
+    factStepIndex = 0;
+    document.getElementById('factOutput').innerHTML = '';
+  }
+  const output = document.getElementById('factOutput');
+  const s = factSteps[factStepIndex];
+  const indent = '&nbsp;&nbsp;'.repeat(s.depth);
+  const div = document.createElement('div');
+  div.className = 'call-line';
+  if (s.type === 'call') {
+    div.classList.add('entering');
+    div.innerHTML = `<span class="indent">${indent}</span>&#9654; Factorial(${s.n})`;
+  } else if (s.type === 'base') {
+    div.classList.add('base');
+    div.innerHTML = `<span class="indent">${indent}</span>&#9733; Base case: Factorial(1) = 1`;
+  } else {
+    div.classList.add('returning');
+    div.innerHTML = `<span class="indent">${indent}</span>&#9664; Factorial(${s.n}) = ${s.result}`;
+  }
+  output.appendChild(div);
+  output.scrollTop = output.scrollHeight;
+  factStepIndex++;
+}
+
+function resetFactorial() {
+  factSteps = [];
+  factStepIndex = 0;
+  document.getElementById('factOutput').innerHTML =
+    '<div style="color:var(--text2);">Click "Run Factorial" or "Step Through" to visualize.</div>';
+}
+
+// ======== LAZY CLIMBER VISUALIZER ========
+function runClimber() {
+  const n = Math.min(10, Math.max(1, parseInt(document.getElementById('climbInput').value) || 5));
+  const output = document.getElementById('climbOutput');
+  output.innerHTML = '';
+  const lines = [];
+  let callCount = 0;
+
+  function climb(val, depth) {
+    callCount++;
+    const indent = '&nbsp;&nbsp;'.repeat(depth);
+    if (val <= 0) {
+      lines.push(`<div class="call-line base"><span class="indent">${indent}</span>Ways(${val}) = 0</div>`);
+      return 0;
+    }
+    if (val === 1) {
+      lines.push(`<div class="call-line base"><span class="indent">${indent}</span>&#9733; Ways(1) = 1 [base]</div>`);
+      return 1;
+    }
+    if (val === 2) {
+      lines.push(`<div class="call-line base"><span class="indent">${indent}</span>&#9733; Ways(2) = 2 [base]</div>`);
+      return 2;
+    }
+    lines.push(`<div class="call-line entering"><span class="indent">${indent}</span>&#9654; Ways(${val}) = Ways(${val-1}) + Ways(${val-2})</div>`);
+    const a = climb(val - 1, depth + 1);
+    const b = climb(val - 2, depth + 1);
+    lines.push(`<div class="call-line returning"><span class="indent">${indent}</span>&#9664; Ways(${val}) = ${a} + ${b} = ${a+b}</div>`);
+    return a + b;
+  }
+
+  const result = climb(n, 0);
+  lines.push(`<div class="call-line" style="color:var(--green);font-weight:700;margin-top:12px;">Result: Ways(${n}) = ${result} &nbsp;(${callCount} recursive calls)</div>`);
+  output.innerHTML = lines.join('');
+}
+
+// ======== PALINDROME VISUALIZER ========
+function runPalindrome() {
+  const word = document.getElementById('palindromeInput').value.toUpperCase().replace(/[^A-Z]/g, '');
+  if (!word) return;
+  const output = document.getElementById('palindromeOutput');
+  output.innerHTML = '';
+  const lines = [];
+
+  function check(s, l, r, depth) {
+    const indent = '&nbsp;&nbsp;'.repeat(depth);
+    const highlight = s.split('').map((c, i) => {
+      if (i === l || i === r) return `<span style="color:var(--accent);font-weight:700;">${c}</span>`;
+      if (i > l && i < r) return c;
+      return `<span style="color:var(--text2);">${c}</span>`;
+    }).join('');
+
+    if (l >= r) {
+      lines.push(`<div class="call-line base"><span class="indent">${indent}</span>&#9733; IsPalindrome("${s}", ${l}, ${r}) &rarr; left >= right &rarr; <span style="color:var(--green);font-weight:700;">TRUE</span></div>`);
+      return true;
+    }
+    if (s[l] !== s[r]) {
+      lines.push(`<div class="call-line" style="border-left-color:var(--red);color:var(--red);"><span class="indent">${indent}</span>&#10007; IsPalindrome: ${highlight} &rarr; '${s[l]}' != '${s[r]}' &rarr; <strong>FALSE</strong></div>`);
+      return false;
+    }
+    lines.push(`<div class="call-line entering"><span class="indent">${indent}</span>&#9654; IsPalindrome: ${highlight} &rarr; '${s[l]}' == '${s[r]}' &#10003; &rarr; check inner</div>`);
+    return check(s, l + 1, r - 1, depth + 1);
+  }
+
+  const result = check(word, 0, word.length - 1, 0);
+  const color = result ? 'var(--green)' : 'var(--red)';
+  const emoji = result ? '&#10004;' : '&#10008;';
+  lines.push(`<div class="call-line" style="color:${color};font-weight:700;margin-top:12px;font-size:1rem;">${emoji} "${word}" is ${result ? '' : 'NOT '}a palindrome</div>`);
+  output.innerHTML = lines.join('');
+}
+
+// ======== FLASHCARDS ========
+const flashcards = [
+  { q: "What is a Turing Machine?", a: "A mathematical model of computation invented by Alan Turing in 1936. It consists of a tape, a read/write head, a state register, and transition rules." },
+  { q: "What are the components of a Turing Machine?", a: "1) Tape (infinite memory strip), 2) Head (reads/writes and moves), 3) State Register (current state), 4) Transition Rules (what to do for each state+symbol)." },
+  { q: "What is the format of a Turing Machine rule?", a: "CurrentState — Read/Write, Direction — NextState. Example: q_flip — 0/1, R — q_flip" },
+  { q: "What was the 'missing rule' in the Flipper Problem?", a: "Rule 3: q_flip — 1/1, R — q_flip. Without it, the machine wouldn't know what to do when encountering a 1 already on the tape." },
+  { q: "What is the Church-Turing Thesis?", a: "Anything that is computable (calculation, logic, graphics, AI) can be done by a Turing Machine. All computers are mathematically equivalent to a Turing Machine — just faster." },
+  { q: "What is the Halting Problem?", a: "It's impossible for any machine to predict whether an arbitrary program will eventually halt or run forever. This is mathematically proven to be undecidable." },
+  { q: "What are the two required parts of recursion?", a: "1) The Base Case (halting state) — answers directly without recursion. 2) The Recursive Step (reduction) — calls itself with a simpler input." },
+  { q: "What happens without a base case?", a: "The recursion never stops, causing a StackOverflowException (infinite recursion)." },
+  { q: "What is the factorial of 5?", a: "5! = 5 × 4 × 3 × 2 × 1 = 120. Recursively: 5! = 5 × 4! = 5 × 24 = 120." },
+  { q: "What is the base case for Factorial?", a: "Factorial(1) = 1. When n equals 1, return 1 directly without further recursion." },
+  { q: "What is the Lazy Climber formula?", a: "Ways(n) = Ways(n-1) + Ways(n-2). Base cases: Ways(1) = 1, Ways(2) = 2. This is the Fibonacci sequence!" },
+  { q: "How many ways to climb 5 stairs (1 or 2 at a time)?", a: "Ways(5) = Ways(4) + Ways(3) = 5 + 3 = 8 ways." },
+  { q: "How does the palindrome checker work recursively?", a: "Compare first and last characters. If they match, recurse on the substring without those characters. Base case: 0 or 1 characters left → it's a palindrome." },
+  { q: "What are the base cases for IsPalindrome?", a: "1) left >= right → true (0 or 1 chars left). 2) s[left] != s[right] → false (mismatch found)." },
+  { q: "What is tail recursion?", a: "When the recursive call is the LAST operation in the function. No work is done after the recursive call returns. Can be optimized to use constant stack space." },
+  { q: "Why is Factorial NOT tail-recursive?", a: "Because after Factorial(n-1) returns, we still need to multiply by n: return n * Factorial(n-1). The multiplication happens AFTER the recursive call." },
+  { q: "What is a quine?", a: "A program that takes no input and produces its own source code as its complete output. Named after Willard Van Orman Quine." },
+  { q: "What are the two parts of a self-reproducing program?", a: "1) The Blueprint (Data) — describes how to build. 2) The Factory (Mechanism) — reads the blueprint and builds. The factory uses the blueprint TWICE." },
+  { q: "Why does the Factory use the Blueprint twice?", a: "Once as instructions (to build the output) and once as data (to copy the blueprint itself into the output)." },
+  { q: "Why does recursion matter in CS theory?", a: "The Church-Turing Thesis proves that anything computable by a Turing Machine can be computed using recursive functions. Recursion is the 'native language' of mathematical models." }
+];
+
+let fcIndex = 0;
+
+function renderCard() {
+  document.getElementById('fc-question').textContent = flashcards[fcIndex].q;
+  document.getElementById('fc-answer').textContent = flashcards[fcIndex].a;
+  document.getElementById('fc-counter').textContent = (fcIndex + 1) + ' / ' + flashcards.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextCard() { fcIndex = (fcIndex + 1) % flashcards.length; renderCard(); }
+function prevCard() { fcIndex = (fcIndex - 1 + flashcards.length) % flashcards.length; renderCard(); }
+function shuffleCards() {
+  for (let i = flashcards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+  }
+  fcIndex = 0; renderCard();
+}
+renderCard();
+
+// ======== QUIZ ========
+const quizData = [
+  { q: "Who invented the Turing Machine and in what year?", opts: ["John von Neumann, 1945", "Alan Turing, 1936", "Alonzo Church, 1940", "Charles Babbage, 1837"], correct: 1, explain: "Alan Turing invented the Turing Machine in 1936 as a mathematical model to determine if any mathematical statement can be answered yes or no." },
+  { q: "What are the four components of a Turing Machine?", opts: ["CPU, RAM, HDD, GPU", "Tape, Head, State Register, Transition Rules", "Input, Process, Output, Storage", "Stack, Queue, Heap, Register"], correct: 1, explain: "A Turing Machine consists of a Tape (memory), Head (read/write), State Register (current state), and Transition Rules (instructions)." },
+  { q: "In the Flipper Problem, what does Rule 1 do?", opts: ["Reads 1, writes 0", "Reads B, halts", "Reads 0, writes 1, moves right", "Reads 0, stays in place"], correct: 2, explain: "Rule 1: q_flip — 0/1, R — q_flip: read 0, write 1, move right, stay in q_flip." },
+  { q: "What does the Church-Turing Thesis state?", opts: ["All computers are quantum", "Anything computable can be computed by a Turing Machine", "Turing Machines are faster than modern computers", "Only recursive functions are computable"], correct: 1, explain: "The Church-Turing Thesis states that anything computable can be done by a Turing Machine. All computers are mathematically equivalent." },
+  { q: "What is the Halting Problem?", opts: ["Determining if a loop is infinite in O(1) time", "It's impossible to predict if any arbitrary program will halt or run forever", "Finding the shortest path in a graph", "A problem only quantum computers can solve"], correct: 1, explain: "The Halting Problem is proven undecidable — no algorithm can determine for all programs whether they will eventually halt." },
+  { q: "What are the two parts of a recursive function?", opts: ["Input and Output", "Header and Body", "Base Case and Recursive Step", "Declaration and Definition"], correct: 2, explain: "Every recursive function needs a Base Case (stops recursion) and a Recursive Step (calls itself with simpler input)." },
+  { q: "What is Factorial(5)?", opts: ["25", "120", "60", "24"], correct: 1, explain: "5! = 5 × 4 × 3 × 2 × 1 = 120." },
+  { q: "What happens if a recursive function has no base case?", opts: ["It returns 0", "It runs once", "StackOverflowException (infinite recursion)", "It compiles but does nothing"], correct: 2, explain: "Without a base case, the function calls itself infinitely, consuming stack memory until a StackOverflowException occurs." },
+  { q: "In the Lazy Climber problem with N=4, how many ways can you reach the top?", opts: ["3", "4", "5", "8"], correct: 2, explain: "Ways(4) = Ways(3) + Ways(2) = 3 + 2 = 5. The paths are: 1-1-1-1, 1-1-2, 1-2-1, 2-1-1, 2-2." },
+  { q: "The Lazy Climber formula Ways(n) = Ways(n-1) + Ways(n-2) is equivalent to which famous sequence?", opts: ["Prime numbers", "Fibonacci sequence", "Geometric series", "Harmonic series"], correct: 1, explain: "The Lazy Climber produces the Fibonacci sequence: 1, 2, 3, 5, 8, 13, ..." },
+  { q: "What are the base cases for IsPalindrome(s, left, right)?", opts: ["left == 0 and right == s.Length", "left >= right (true) or s[left] != s[right] (false)", "s.Length == 0 only", "left == right only"], correct: 1, explain: "Two base cases: left >= right → true (0 or 1 chars left), and s[left] != s[right] → false (mismatch)." },
+  { q: "Is \"RACECAR\" a palindrome?", opts: ["Yes", "No", "Only if case-insensitive", "Depends on the algorithm"], correct: 0, explain: "RACECAR reads the same forwards and backwards: R-A-C-E-C-A-R." },
+  { q: "What makes a function tail-recursive?", opts: ["It uses a while loop", "The recursive call is the LAST operation", "It has only one parameter", "It returns void"], correct: 1, explain: "A tail-recursive function has the recursive call as its very last operation — no computation happens after it returns." },
+  { q: "Why is 'return n * Factorial(n-1)' NOT tail-recursive?", opts: ["Because it uses multiplication", "Because n is modified", "Because multiplication happens AFTER the recursive call returns", "Because it doesn't use ref"], correct: 2, explain: "After Factorial(n-1) returns, the result must be multiplied by n. That post-call work means it's not in tail position." },
+  { q: "In a quine (self-reproducing program), the Factory uses the Blueprint:", opts: ["Once, as code", "Twice: once as instructions, once as data", "Three times", "Zero times — it generates from scratch"], correct: 1, explain: "The Factory uses the Blueprint twice: once to execute it as instructions, and once to reproduce it as data in the output." }
+];
+
+let quizAnswered = 0, quizCorrect = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  quizAnswered = 0; quizCorrect = 0;
+  document.getElementById('quizScore').style.display = 'none';
+  quizData.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-question'; div.id = 'qq-' + i;
+    let opts = '';
+    item.opts.forEach((o, j) => {
+      opts += `<button class="quiz-option" onclick="answerQuiz(${i},${j})">${o}</button>`;
+    });
+    div.innerHTML = `<h4><span class="q-num">Q${i+1}</span> ${item.q}</h4>${opts}<div class="quiz-explanation" id="qe-${i}">${item.explain}</div>`;
+    container.appendChild(div);
+  });
+}
+
+function answerQuiz(qi, oi) {
+  const q = document.getElementById('qq-' + qi);
+  const btns = q.querySelectorAll('.quiz-option');
+  if (btns[0].classList.contains('disabled')) return;
+  quizAnswered++;
+  const correct = quizData[qi].correct;
+  btns.forEach((b, j) => {
+    b.classList.add('disabled');
+    if (j === correct) b.classList.add('correct');
+    if (j === oi && oi !== correct) b.classList.add('wrong');
+  });
+  if (oi === correct) quizCorrect++;
+  document.getElementById('qe-' + qi).classList.add('show');
+  if (quizAnswered === quizData.length) setTimeout(showScore, 600);
+}
+
+function showScore() {
+  const sc = document.getElementById('quizScore');
+  sc.style.display = 'block';
+  const pct = Math.round((quizCorrect / quizData.length) * 100);
+  document.getElementById('scoreNum').textContent = quizCorrect + ' / ' + quizData.length;
+  document.getElementById('scoreNum').style.color =
+    pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--orange)' : 'var(--red)';
+  document.getElementById('scoreMsg').textContent =
+    pct >= 90 ? "Excellent! You've mastered recursion!" :
+    pct >= 70 ? "Good job! Review the topics you missed." :
+    pct >= 50 ? "Getting there. Revisit the flashcards." :
+    "Keep studying! Use the flashcards and review each section.";
+  sc.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  buildQuiz();
+  document.getElementById('quizContainer').scrollIntoView({ behavior: 'smooth' });
+}
+
+buildQuiz();
+
+// ======== KEYBOARD SHORTCUTS ========
+document.addEventListener('keydown', function(e) {
+  const active = document.querySelector('.section.active');
+  if (active && active.id === 'sec-flashcards') {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  }
+});
+</script>
+</body>
+</html>

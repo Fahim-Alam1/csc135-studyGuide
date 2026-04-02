@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 135 - Study Guides</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --bg3: #334155;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #a78bfa;
+    --green: #4ade80;
+    --orange: #fb923c;
+    --border: #475569;
+    --card: #1e293b;
+    --card-hover: #263548;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --bg2: #ffffff;
+    --bg3: #e2e8f0;
+    --text: #1e293b;
+    --text2: #64748b;
+    --border: #cbd5e1;
+    --card: #ffffff;
+    --card-hover: #f8fafc;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 60px 24px 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  }
+  .header-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  .header p {
+    font-size: 1.1rem;
+    color: var(--text2);
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .header-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--text2);
+  }
+  .header-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 12px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .theme-toggle {
+    background: var(--bg3);
+    border: none;
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--border); }
+
+  /* CONTAINER */
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-left: 4px;
+  }
+
+  /* GUIDE CARDS */
+  .guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .guide-card {
+    display: flex;
+    align-items: stretch;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.25s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .guide-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent);
+  }
+  .guide-card:hover .card-arrow { color: var(--accent); transform: translateX(4px); }
+
+  .card-accent {
+    width: 6px;
+    flex-shrink: 0;
+  }
+  .card-body {
+    flex: 1;
+    padding: 28px 30px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .card-info { flex: 1; }
+  .card-number {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 0.9rem;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .card-tag {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--bg3);
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .card-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    font-size: 1.4rem;
+    color: var(--text2);
+    transition: all 0.25s;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 30px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text2);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .header { padding: 40px 20px 30px; }
+    .header h1 { font-size: 1.8rem; }
+    .header p { font-size: 0.95rem; }
+    .header-meta { flex-direction: column; gap: 8px; }
+    .container { padding: 24px 16px 60px; }
+    .card-body { padding: 20px; gap: 16px; flex-wrap: wrap; }
+    .card-icon { width: 44px; height: 44px; font-size: 1.3rem; }
+    .card-title { font-size: 1.1rem; }
+    .card-arrow { padding: 0 16px; }
+    .topbar { padding: 10px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">&#9790; Dark</button>
+</div>
+
+<div class="header">
+  <div class="header-badge">Sacramento State</div>
+  <h1>CSC 135 Study Guides</h1>
+  <p>Computability and Formal Languages &mdash; Interactive study guides with flashcards, visualizers, and practice quizzes.</p>
+  <div class="header-meta">
+    <span>&#128218; Dr. Pradeep Tapadiya</span>
+    <span>&#127891; CSC 135-05</span>
+    <span>&#128197; Spring 2026</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="section-label">Lecture Study Guides</div>
+  <div class="guide-list">
+
+    <!-- GUIDE 1: C# -->
+    <a class="guide-card" href="01-CSharp-StudyGuide.html">
+      <div class="card-accent" style="background: linear-gradient(180deg, #38bdf8, #818cf8);"></div>
+      <div class="card-body">
+        <div class="card-icon" style="background: rgba(56,189,248,0.1); color: #38bdf8;">&#9889;</div>
+        <div class="card-info">
+          <div class="card-number">Lecture 01</div>
+          <div class="card-title">Introduction to C#</div>
+          <div class="card-desc">Data types, input/output, decisions, operators, loops, collections, structures, value vs reference types, and generic collections.</div>
+          <div class="card-tags">
+            <span class="card-tag">10 Topics</span>
+            <span class="card-tag">20 Flashcards</span>
+            <span class="card-tag">15 Quiz Questions</span>
+            <span class="card-tag">Cheat Sheet</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+
+    <!-- GUIDE 2: Recursion -->
+    <a class="guide-card" href="02-Recursion-StudyGuide.html">
+      <div class="card-accent" style="background: linear-gradient(180deg, #818cf8, #a78bfa);"></div>
+      <div class="card-body">
+        <div class="card-icon" style="background: rgba(129,140,248,0.1); color: #818cf8;">&#128260;</div>
+        <div class="card-info">
+          <div class="card-number">Lecture 02</div>
+          <div class="card-title">Recursion &amp; Turing Machines</div>
+          <div class="card-desc">Turing machines, Church-Turing thesis, factorial, lazy climber, palindrome oracle, tail recursion, self-reproduction, and quines.</div>
+          <div class="card-tags">
+            <span class="card-tag">9 Topics</span>
+            <span class="card-tag">20 Flashcards</span>
+            <span class="card-tag">15 Quiz Questions</span>
+            <span class="card-tag">4 Visualizers</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-arrow">&#8594;</div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer">
+  CSC 135 &mdash; Computability and Formal Languages &mdash; Sacramento State
+</div>
+
+<script>
+function toggleTheme() {
+  const isLight = document.body.getAttribute('data-theme') === 'light';
+  document.body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  document.getElementById('themeBtn').innerHTML = isLight ? '&#9790; Dark' : '&#9788; Light';
+  localStorage.setItem('theme-index', isLight ? 'dark' : 'light');
+}
+(function() {
+  const saved = localStorage.getItem('theme-index');
+  if (saved === 'light') {
+    document.body.setAttribute('data-theme', 'light');
+    document.getElementById('themeBtn').innerHTML = '&#9788; Light';
+  }
+})();
+</script>
+</body>
+</html>
