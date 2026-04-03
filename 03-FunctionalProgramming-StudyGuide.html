@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSC 135 - Functional Programming Study Guide</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --bg3: #334155;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #a78bfa;
+    --green: #4ade80;
+    --red: #f87171;
+    --orange: #fb923c;
+    --yellow: #facc15;
+    --border: #475569;
+    --code-bg: #0c1222;
+    --card: #1e293b;
+    --card-hover: #263548;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --bg2: #ffffff;
+    --bg3: #e2e8f0;
+    --text: #1e293b;
+    --text2: #64748b;
+    --border: #cbd5e1;
+    --code-bg: #f8fafc;
+    --card: #ffffff;
+    --card-hover: #f8fafc;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text);
+    line-height: 1.7; transition: background 0.3s, color 0.3s;
+  }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 4px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; z-index: 100;
+    padding: 20px 0; transition: transform 0.3s;
+  }
+  .sidebar.closed { transform: translateX(-280px); }
+  .sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .sidebar-header h2 a {
+    color: var(--accent); text-decoration: none; transition: opacity 0.2s;
+  }
+  .sidebar-header h2 a:hover { opacity: 0.75; }
+  .sidebar-header h2 { font-size: 1.1rem; color: var(--accent); font-weight: 700; letter-spacing: 0.5px; }
+  .sidebar-header p { font-size: 0.8rem; color: var(--text2); margin-top: 4px; }
+  .home-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; color: var(--text2);
+    text-decoration: none; font-size: 0.85rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .home-btn:hover { color: var(--accent); background: rgba(56,189,248,0.05); border-left-color: var(--accent); }
+  .home-btn .icon { font-size: 1rem; width: 24px; text-align: center; }
+  .nav-section {
+    padding: 8px 20px; font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text2); font-weight: 600;
+  }
+  .nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; color: var(--text2);
+    text-decoration: none; font-size: 0.9rem;
+    transition: all 0.2s;
+    border-left: 3px solid transparent; cursor: pointer;
+  }
+  .nav-link:hover, .nav-link.active {
+    color: var(--accent); background: rgba(56,189,248,0.05);
+    border-left-color: var(--accent);
+  }
+  .nav-link .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+  .search-input {
+    width: calc(100% - 40px); padding: 10px 14px 10px 36px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 0.9rem;
+    margin: 10px 20px; outline: none; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-wrapper { position: relative; }
+  .search-icon { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); color: var(--text2); font-size: 0.9rem; }
+
+  /* MAIN */
+  .main { margin-left: 280px; padding: 30px 40px 60px; max-width: 960px; transition: margin-left 0.3s; }
+  .main.full { margin-left: 0; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 30px; position: sticky; top: 0;
+    background: var(--bg); padding: 12px 0; z-index: 50;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .hamburger { display: none; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
+  .theme-toggle {
+    background: var(--bg3); border: none; color: var(--text);
+    padding: 8px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 0.85rem; transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--border); }
+  .progress-container { background: var(--bg3); border-radius: 12px; height: 8px; width: 200px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 12px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; }
+  .progress-text { font-size: 0.8rem; color: var(--text2); margin-left: 8px; }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  h2 { font-size: 1.4rem; font-weight: 700; color: var(--accent); margin: 30px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--bg3); }
+  h3 { font-size: 1.1rem; color: var(--accent3); margin: 20px 0 8px; }
+  .subtitle { font-size: 1rem; color: var(--text2); margin-bottom: 24px; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 10px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  /* CODE */
+  .code-block {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px; margin: 14px 0 20px;
+    overflow-x: auto; position: relative;
+  }
+  .code-block code {
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+    font-size: 0.85rem; line-height: 1.6; color: var(--text); white-space: pre;
+  }
+  .code-label { position: absolute; top: 8px; right: 12px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); background: var(--bg3); padding: 2px 8px; border-radius: 4px; }
+  .copy-btn { position: absolute; top: 8px; right: 70px; background: var(--bg3); border: none; color: var(--text2); padding: 2px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; transition: all 0.2s; }
+  .copy-btn:hover { background: var(--accent); color: #000; }
+  .kw { color: #c084fc; } .tp { color: #38bdf8; } .str { color: #4ade80; }
+  .cm { color: #64748b; } .num { color: #fb923c; } .fn { color: #facc15; } .op { color: #f472b6; }
+
+  /* CARDS */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 16px 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all 0.2s; cursor: default; }
+  .card:hover { background: var(--card-hover); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card.clickable { cursor: pointer; }
+  .card h4 { color: var(--accent); font-size: 0.95rem; margin-bottom: 8px; }
+  .card p { font-size: 0.85rem; color: var(--text2); margin: 0; }
+  .card code { font-family: 'Fira Code', monospace; font-size: 0.8rem; background: var(--code-bg); padding: 2px 6px; border-radius: 4px; }
+
+  /* CALLOUT */
+  .callout { border-left: 4px solid var(--accent); background: rgba(56,189,248,0.05); padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+  .callout.warning { border-left-color: var(--orange); background: rgba(251,146,60,0.05); }
+  .callout.success { border-left-color: var(--green); background: rgba(74,222,128,0.05); }
+  .callout strong { color: var(--accent); }
+  .callout.warning strong { color: var(--orange); }
+  .callout.success strong { color: var(--green); }
+
+  /* TABLE */
+  .cheat-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.9rem; }
+  .cheat-table th { background: var(--bg3); padding: 10px 14px; text-align: left; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--border); }
+  .cheat-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .cheat-table tr:hover td { background: rgba(56,189,248,0.03); }
+  .cheat-table code { font-family: 'Fira Code', monospace; font-size: 0.8rem; background: var(--code-bg); padding: 2px 6px; border-radius: 4px; }
+
+  /* DIAGRAMS */
+  .diagram {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px; margin: 20px 0;
+    overflow-x: auto;
+  }
+  .diagram-title {
+    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text2); font-weight: 600; margin-bottom: 16px; text-align: center;
+  }
+  /* Pipeline diagram */
+  .pipeline { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; margin: 12px 0; }
+  .pipe-box {
+    padding: 12px 20px; border-radius: 10px; text-align: center;
+    font-size: 0.85rem; font-weight: 600; min-width: 100px;
+    border: 2px solid; line-height: 1.4;
+  }
+  .pipe-arrow { font-size: 1.4rem; margin: 0 6px; color: var(--text2); flex-shrink: 0; }
+  .pipe-data { background: rgba(56,189,248,0.08); border-color: var(--accent); color: var(--accent); }
+  .pipe-fn { background: rgba(167,139,250,0.08); border-color: var(--accent3); color: var(--accent3); }
+  .pipe-result { background: rgba(74,222,128,0.08); border-color: var(--green); color: var(--green); }
+  .pipe-filter { background: rgba(251,146,60,0.08); border-color: var(--orange); color: var(--orange); }
+  .pipe-reduce { background: rgba(250,204,21,0.08); border-color: var(--yellow); color: var(--yellow); }
+  .pipe-label { font-size: 0.7rem; color: var(--text2); display: block; font-weight: 400; margin-top: 2px; }
+
+  /* Architecture diagram */
+  .arch-diagram { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 12px 0; }
+  .arch-layer {
+    width: 100%; max-width: 500px; padding: 20px 24px;
+    border-radius: 12px; text-align: center;
+    font-weight: 600; font-size: 0.9rem;
+  }
+  .arch-core {
+    background: rgba(74,222,128,0.08); border: 2px solid var(--green);
+    color: var(--green); border-radius: 12px 12px 0 0;
+  }
+  .arch-shell {
+    background: rgba(56,189,248,0.08); border: 2px solid var(--accent);
+    border-top: none; color: var(--accent); border-radius: 0 0 12px 12px;
+  }
+  .arch-label { font-size: 0.75rem; color: var(--text2); font-weight: 400; display: block; margin-top: 4px; }
+  .arch-arrow-between { font-size: 1rem; color: var(--text2); padding: 0; line-height: 1; }
+
+  /* INTERACTIVE VISUALIZER */
+  .viz-container { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin: 20px 0; }
+  .viz-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .viz-controls label { font-size: 0.9rem; color: var(--text2); }
+  .viz-controls input[type="text"] {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px; color: var(--text);
+    width: 200px; font-size: 0.9rem; outline: none; font-family: 'Fira Code', monospace;
+  }
+  .viz-controls input[type="text"]:focus { border-color: var(--accent); }
+  .viz-controls select {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px; color: var(--text);
+    font-size: 0.9rem; outline: none; cursor: pointer;
+  }
+  .viz-btn { background: var(--accent); border: none; color: #000; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: opacity 0.2s; }
+  .viz-btn:hover { opacity: 0.85; }
+  .viz-output {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+    font-family: 'Fira Code', monospace; font-size: 0.85rem;
+    line-height: 1.8; overflow-x: auto; min-height: 60px; max-height: 400px; overflow-y: auto;
+  }
+
+  /* Data flow animation boxes */
+  .flow-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .flow-cell {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 40px; height: 40px; padding: 0 10px;
+    border-radius: 8px; font-family: 'Fira Code', monospace;
+    font-size: 0.9rem; font-weight: 600;
+    border: 2px solid var(--border); background: var(--bg);
+    transition: all 0.3s;
+  }
+  .flow-cell.highlight { border-color: var(--accent); background: rgba(56,189,248,0.1); color: var(--accent); }
+  .flow-cell.pass { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+  .flow-cell.fail { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); text-decoration: line-through; opacity: 0.5; }
+  .flow-cell.result { border-color: var(--yellow); background: rgba(250,204,21,0.1); color: var(--yellow); }
+  .flow-label { font-size: 0.8rem; color: var(--text2); min-width: 60px; font-weight: 600; }
+
+  /* Comparison boxes */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .compare-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; border-top: 3px solid;
+  }
+  .compare-box.imperative { border-top-color: var(--orange); }
+  .compare-box.functional { border-top-color: var(--green); }
+  .compare-box h4 { margin-bottom: 10px; font-size: 0.95rem; }
+  .compare-box.imperative h4 { color: var(--orange); }
+  .compare-box.functional h4 { color: var(--green); }
+  .compare-box p { font-size: 0.85rem; color: var(--text2); margin: 0; }
+
+  /* FLASHCARDS */
+  .flashcard-container { perspective: 1000px; margin: 20px 0; }
+  .flashcard { width: 100%; min-height: 220px; position: relative; cursor: pointer; transform-style: preserve-3d; transition: transform 0.5s; }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute; width: 100%; min-height: 220px;
+    backface-visibility: hidden; border-radius: 14px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px; text-align: center;
+  }
+  .flashcard-front { background: linear-gradient(135deg, var(--bg2), var(--bg3)); border: 1px solid var(--border); }
+  .flashcard-back { background: linear-gradient(135deg, #1a1a4e, #2d1b69); border: 1px solid var(--accent2); transform: rotateY(180deg); color: #e2e8f0; }
+  [data-theme="light"] .flashcard-back { background: linear-gradient(135deg, #dbeafe, #e0e7ff); color: #1e293b; }
+  .flashcard-front h3 { color: var(--accent); font-size: 1.2rem; }
+  .flashcard-front p { color: var(--text2); font-size: 0.85rem; margin-top: 10px; }
+  .flashcard-back p { font-size: 1rem; line-height: 1.6; }
+  .flashcard-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
+  .flashcard-nav button { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+  .flashcard-nav button:hover { background: var(--accent); color: #000; }
+  .flashcard-counter { font-size: 0.85rem; color: var(--text2); }
+
+  /* QUIZ */
+  .quiz-question { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .quiz-question h4 { font-size: 1rem; margin-bottom: 14px; color: var(--text); }
+  .quiz-question .q-num { display: inline-block; background: var(--accent); color: #000; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; margin-right: 8px; }
+  .quiz-option { display: block; width: 100%; text-align: left; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; color: var(--text); cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); background: rgba(56,189,248,0.05); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+  .quiz-option.disabled { pointer-events: none; }
+  .quiz-explanation { display: none; margin-top: 10px; padding: 12px; background: rgba(56,189,248,0.05); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 0.85rem; color: var(--text2); }
+  .quiz-explanation.show { display: block; }
+  .quiz-score { text-align: center; padding: 30px; background: var(--card); border-radius: 14px; border: 1px solid var(--border); margin: 20px 0; display: none; }
+  .quiz-score h3 { font-size: 1.5rem; margin-bottom: 10px; }
+  .quiz-score .score-num { font-size: 3rem; font-weight: 800; }
+  .quiz-reset { background: var(--accent); border: none; color: #000; padding: 10px 28px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; margin-top: 16px; transition: opacity 0.2s; }
+  .quiz-reset:hover { opacity: 0.85; }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+  .tab-btn { background: none; border: none; color: var(--text2); padding: 10px 20px; cursor: pointer; font-size: 0.9rem; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-280px); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 20px; }
+    .hamburger { display: block; }
+    .progress-container { width: 120px; }
+    h1 { font-size: 1.5rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .pipeline { flex-direction: column; }
+    .pipe-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><a href="index.html">CSC 135</a></h2>
+    <p>Functional Programming</p>
+  </div>
+  <a class="home-btn" href="index.html">
+    <span class="icon">&#8592;</span> Back to All Guides
+  </a>
+  <div class="search-wrapper">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search topics...">
+  </div>
+  <div class="nav-section">Overview</div>
+  <a class="nav-link active" data-section="overview" onclick="showSection('overview')">
+    <span class="icon">&#127968;</span> Overview
+  </a>
+  <div class="nav-section">Foundations</div>
+  <a class="nav-link" data-section="motivation" onclick="showSection('motivation')">
+    <span class="icon">&#128161;</span> Functions as Data
+  </a>
+  <a class="nav-link" data-section="philosophy" onclick="showSection('philosophy')">
+    <span class="icon">&#129504;</span> FP Philosophy
+  </a>
+  <a class="nav-link" data-section="whyfp" onclick="showSection('whyfp')">
+    <span class="icon">&#9889;</span> Why FP?
+  </a>
+  <a class="nav-link" data-section="multiparadigm" onclick="showSection('multiparadigm')">
+    <span class="icon">&#129513;</span> Multi-Paradigm
+  </a>
+  <div class="nav-section">Higher-Order Functions</div>
+  <a class="nav-link" data-section="hof" onclick="showSection('hof')">
+    <span class="icon">&#128640;</span> HOF Basics
+  </a>
+  <a class="nav-link" data-section="map" onclick="showSection('map')">
+    <span class="icon">&#128204;</span> Map
+  </a>
+  <a class="nav-link" data-section="filter" onclick="showSection('filter')">
+    <span class="icon">&#128269;</span> Filter
+  </a>
+  <a class="nav-link" data-section="reduce" onclick="showSection('reduce')">
+    <span class="icon">&#128200;</span> Reduce / Fold
+  </a>
+  <a class="nav-link" data-section="composition" onclick="showSection('composition')">
+    <span class="icon">&#128279;</span> Composition
+  </a>
+  <a class="nav-link" data-section="linq" onclick="showSection('linq')">
+    <span class="icon">&#9881;</span> LINQ
+  </a>
+  <div class="nav-section">Advanced</div>
+  <a class="nav-link" data-section="pds" onclick="showSection('pds')">
+    <span class="icon">&#128230;</span> Persistent Data
+  </a>
+  <div class="nav-section">Study Tools</div>
+  <a class="nav-link" data-section="flashcards" onclick="showSection('flashcards')">
+    <span class="icon">&#127183;</span> Flashcards
+  </a>
+  <a class="nav-link" data-section="cheatsheet" onclick="showSection('cheatsheet')">
+    <span class="icon">&#128203;</span> Cheat Sheet
+  </a>
+  <a class="nav-link" data-section="quiz" onclick="showSection('quiz')">
+    <span class="icon">&#127919;</span> Practice Quiz
+  </a>
+</nav>
+
+<div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;" onclick="toggleSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+      <div class="progress-container"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <span class="progress-text" id="progressText">0 / 11 topics</span>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">&#9790; Dark</button>
+    </div>
+  </div>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="section active" id="sec-overview">
+    <h1>Functional Programming</h1>
+    <p class="subtitle">CSC 135 &mdash; Functions as Data, Higher-Order Functions, and Composition</p>
+    <div class="callout">
+      <strong>Exam Prep:</strong> This guide covers functional programming from the ground up &mdash; why it matters, how HOFs work (Map, Filter, Reduce), function composition, LINQ, and persistent data structures. Includes interactive visualizers and a practice quiz.
+    </div>
+    <h2>Topics Covered</h2>
+    <div class="card-grid">
+      <div class="card clickable" onclick="showSection('motivation')">
+        <h4>&#128161; Functions as Data</h4>
+        <p>Eliminating repetitive code by passing functions as arguments.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('philosophy')">
+        <h4>&#129504; FP Philosophy</h4>
+        <p>Pure functions, immutability, lambda calculus roots.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('hof')">
+        <h4>&#128640; Higher-Order Functions</h4>
+        <p>Functions that accept or return other functions.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('map')">
+        <h4>&#128204; Map / Filter / Reduce</h4>
+        <p>The Big Three HOFs &mdash; transform, select, and combine data.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('composition')">
+        <h4>&#128279; Composition &amp; LINQ</h4>
+        <p>Chaining functions and C#'s built-in functional query syntax.</p>
+      </div>
+      <div class="card clickable" onclick="showSection('pds')">
+        <h4>&#128230; Persistent Data Structures</h4>
+        <p>Immutable data that preserves all previous versions.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FUNCTIONS AS DATA ===== -->
+  <div class="section" id="sec-motivation">
+    <h1>Functions as Data</h1>
+    <p class="subtitle">The motivation for functional programming: eliminating repetitive code</p>
+
+    <h2>The Problem: Repetitive Code</h2>
+    <p>Consider two nearly identical functions &mdash; one counts odd numbers, the other counts even numbers:</p>
+
+    <div class="compare-grid">
+      <div class="compare-box imperative">
+        <h4>CountOddNumbers</h4>
+        <div class="code-block" style="margin:0;">
+          <code><span class="kw">public static int</span> <span class="fn">CountOddNumbers</span>(<span class="tp">int</span>[] numbers)
+{
+    <span class="tp">int</span> count = <span class="num">0</span>;
+    <span class="kw">foreach</span> (<span class="tp">int</span> number <span class="kw">in</span> numbers)
+    {
+        <span class="kw">if</span> (number % <span class="num">2</span> != <span class="num">0</span>)
+            count++;
+    }
+    <span class="kw">return</span> count;
+}</code>
+        </div>
+      </div>
+      <div class="compare-box imperative">
+        <h4>CountEvenNumbers</h4>
+        <div class="code-block" style="margin:0;">
+          <code><span class="kw">public static int</span> <span class="fn">CountEvenNumbers</span>(<span class="tp">int</span>[] numbers)
+{
+    <span class="tp">int</span> count = <span class="num">0</span>;
+    <span class="kw">foreach</span> (<span class="tp">int</span> number <span class="kw">in</span> numbers)
+    {
+        <span class="kw">if</span> (number % <span class="num">2</span> == <span class="num">0</span>)
+            count++;
+    }
+    <span class="kw">return</span> count;
+}</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>The only difference</strong> is the condition: <code>!= 0</code> vs <code>== 0</code>. Everything else is copy-pasted. This violates the DRY (Don't Repeat Yourself) principle.
+    </div>
+
+    <h2>The Solution: Pass the Condition as a Function</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">public static int</span> <span class="fn">CountNumbers</span>(<span class="tp">int</span>[] numbers, <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">bool</span>&gt; condition)
+{
+    <span class="tp">int</span> count = <span class="num">0</span>;
+    <span class="kw">foreach</span> (<span class="tp">int</span> number <span class="kw">in</span> numbers)
+    {
+        <span class="kw">if</span> (condition(number))
+            count++;
+    }
+    <span class="kw">return</span> count;
+}
+
+<span class="tp">int</span>[] numbers = { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>, <span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span> };
+<span class="tp">int</span> oddCount  = <span class="fn">CountNumbers</span>(numbers, IsOdd);   <span class="cm">// pass function!</span>
+<span class="tp">int</span> evenCount = <span class="fn">CountNumbers</span>(numbers, IsEven);  <span class="cm">// pass function!</span></code>
+    </div>
+
+    <div class="callout success">
+      <strong>Key Insight:</strong> <code>Func&lt;int, bool&gt;</code> means "a function that takes an int and returns a bool." By passing the <em>condition itself</em> as an argument, one function replaces two. This is the foundation of functional programming.
+    </div>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Functions as First-Class Citizens</div>
+      <div class="pipeline">
+        <div class="pipe-box pipe-data">numbers[]<span class="pipe-label">data</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-fn">CountNumbers<span class="pipe-label">generic logic</span></div>
+        <span class="pipe-arrow">&#8592;</span>
+        <div class="pipe-box pipe-filter">IsOdd / IsEven<span class="pipe-label">pluggable condition</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-result">result<span class="pipe-label">count</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FP PHILOSOPHY ===== -->
+  <div class="section" id="sec-philosophy">
+    <h1>FP &mdash; A Different Philosophy</h1>
+    <p class="subtitle">Treating computation as the evaluation of mathematical functions</p>
+
+    <h2>Core Concepts</h2>
+    <table class="cheat-table">
+      <tr><th>Concept</th><th>Definition</th></tr>
+      <tr><td><strong>Functional Programming</strong></td><td>Treats computation as the evaluation of <strong>mathematical functions</strong></td></tr>
+      <tr><td><strong>Roots</strong></td><td>Based on <strong>Lambda Calculus</strong> (Alonzo Church) &mdash; not the Turing Machine</td></tr>
+      <tr><td><strong>Immutability</strong></td><td>Variables are <strong>constants</strong> &mdash; once set, they never change</td></tr>
+    </table>
+
+    <h2>Pure vs Impure Functions</h2>
+    <div class="compare-grid">
+      <div class="compare-box functional">
+        <h4>Pure Functions</h4>
+        <p><strong>Deterministic:</strong> Same input always gives same output</p>
+        <p style="margin-top:8px;"><strong>No side effects:</strong> Don't change global state or alter input. Simply return new values.</p>
+        <div class="code-block" style="margin:10px 0 0;">
+          <code><span class="cm">// Pure: only depends on input</span>
+<span class="tp">int</span> <span class="fn">Add</span>(<span class="tp">int</span> a, <span class="tp">int</span> b)
+{
+    <span class="kw">return</span> a + b;
+}</code>
+        </div>
+      </div>
+      <div class="compare-box imperative">
+        <h4>Impure Functions</h4>
+        <p><strong>Non-deterministic:</strong> Output may vary even with same input</p>
+        <p style="margin-top:8px;"><strong>Has side effects:</strong> Modifies external state, does I/O, changes globals.</p>
+        <div class="code-block" style="margin:10px 0 0;">
+          <code><span class="cm">// Impure: modifies external state</span>
+<span class="tp">int</span> total = <span class="num">0</span>;
+<span class="kw">void</span> <span class="fn">AddToTotal</span>(<span class="tp">int</span> x)
+{
+    total += x; <span class="cm">// side effect!</span>
+}</code>
+        </div>
+      </div>
+    </div>
+
+    <h2>Analogy</h2>
+    <div class="compare-grid">
+      <div class="compare-box imperative">
+        <h4>Imperative Programming</h4>
+        <p>Like giving directions to a driver:<br><em>"Go straight, turn left, stop."</em></p>
+      </div>
+      <div class="compare-box functional">
+        <h4>Functional Programming</h4>
+        <p>Like drawing a map:<br><em>You define where everything is in relation to everything else.</em></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WHY FP ===== -->
+  <div class="section" id="sec-whyfp">
+    <h1>Why Do We Care for FP?</h1>
+    <p class="subtitle">Concurrency, declarative style, and composition</p>
+
+    <div class="card-grid">
+      <div class="card" style="border-left: 4px solid var(--green);">
+        <h4>Concurrency</h4>
+        <p>Since data is <strong>immutable</strong>, you never have <strong>race conditions</strong>. Multiple threads can safely read the same data without locks.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h4>Declarative Style</h4>
+        <p>You describe <strong>what</strong> you want, not <strong>how</strong> to get it. Code reads like a specification, not step-by-step instructions.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent3);">
+        <h4>Composition</h4>
+        <p>Functions are <strong>"first-class citizens."</strong> Pass them as arguments, return them as values. Build complex logic from small, reusable "lego blocks."</p>
+      </div>
+    </div>
+
+    <h2>Imperative vs Functional Style</h2>
+    <div class="compare-grid">
+      <div class="compare-box imperative">
+        <h4>Imperative</h4>
+        <p>"Loop through array, check if even, add to sum."</p>
+        <div class="code-block" style="margin:10px 0 0;">
+          <code><span class="tp">int</span> sum = <span class="num">0</span>;
+<span class="kw">foreach</span> (<span class="kw">var</span> x <span class="kw">in</span> list)
+    <span class="kw">if</span> (x % <span class="num">2</span> == <span class="num">0</span>)
+        sum += x;</code>
+        </div>
+      </div>
+      <div class="compare-box functional">
+        <h4>Functional</h4>
+        <p><code>sum(filter(isEven, list))</code></p>
+        <div class="code-block" style="margin:10px 0 0;">
+          <code><span class="tp">int</span> sum = list
+    .<span class="fn">Where</span>(x => x % <span class="num">2</span> == <span class="num">0</span>)
+    .<span class="fn">Sum</span>();</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MULTI-PARADIGM ===== -->
+  <div class="section" id="sec-multiparadigm">
+    <h1>Multi-Paradigm Programming</h1>
+    <p class="subtitle">In modern software, we mix both functional and imperative styles</p>
+
+    <div class="callout success">
+      <strong>Real-world approach:</strong> Modern software uses <strong>both</strong> paradigms. The key is knowing <em>when</em> to use each one.
+    </div>
+
+    <!-- Architecture Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Functional Core / Imperative Shell Architecture</div>
+      <div class="arch-diagram">
+        <div class="arch-layer arch-core">
+          Functional Core (The Brains)
+          <span class="arch-label">Pure functions &bull; Business logic &bull; Data transformations &bull; Calculations</span>
+          <span class="arch-label" style="margin-top:4px;">Easy to test &bull; Predictable &bull; No side effects</span>
+        </div>
+        <div class="arch-layer arch-shell">
+          Imperative Shell (The Hands)
+          <span class="arch-label">Databases &bull; Network requests &bull; User input &bull; File I/O</span>
+          <span class="arch-label" style="margin-top:4px;">Interacts with the "messy" real world</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>How It Works</h2>
+    <div class="card-grid">
+      <div class="card" style="border-left: 4px solid var(--green);">
+        <h4>Functional Core</h4>
+        <p>Write business logic, data transformations, and calculations using <strong>pure functions</strong>. Easy to unit test, predictable, and bug-free.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h4>Imperative Shell</h4>
+        <p>Write code that interacts with the "messy" real world &mdash; databases, network requests, user input, disk I/O &mdash; using <strong>imperative code</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOF BASICS ===== -->
+  <div class="section" id="sec-hof">
+    <h1>Higher-Order Functions (HOF)</h1>
+    <p class="subtitle">Functions that operate on other functions</p>
+
+    <h2>HOF Requirements</h2>
+    <div class="callout">
+      <strong>A Higher-Order Function must meet at least one:</strong>
+      <ul style="margin-top:8px;">
+        <li><strong>Requirement A:</strong> Accept a function as an argument</li>
+        <li><strong>Requirement B:</strong> Return a function as its result</li>
+      </ul>
+    </div>
+
+    <h2>Example: Function Factory (Returns a Function)</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">public static</span> <span class="tp">Func</span>&lt;<span class="tp">string</span>, <span class="tp">string</span>&gt; <span class="fn">CreateGreeter</span>(<span class="tp">string</span> prefix)
+{
+    <span class="cm">// Return a function that takes a name and adds the prefix</span>
+    <span class="kw">return</span> (name) => <span class="str">$"{prefix} {name}"</span>;
+}
+
+<span class="kw">var</span> formalGreeting = <span class="fn">CreateGreeter</span>(<span class="str">"Dear"</span>);
+<span class="kw">var</span> casualGreeting = <span class="fn">CreateGreeter</span>(<span class="str">"Hey"</span>);
+
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(formalGreeting(<span class="str">"Pradeep"</span>)); <span class="cm">// Dear Pradeep</span>
+<span class="tp">Console</span>.<span class="fn">WriteLine</span>(casualGreeting(<span class="str">"Pradeep"</span>)); <span class="cm">// Hey Pradeep</span></code>
+    </div>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">HOF: CreateGreeter returns specialized functions</div>
+      <div class="pipeline">
+        <div class="pipe-box pipe-data">"Dear"<span class="pipe-label">prefix</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-fn">CreateGreeter<span class="pipe-label">HOF</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-result">formalGreeting()<span class="pipe-label">returned function</span></div>
+      </div>
+      <div style="text-align:center; margin-top:8px;">
+        <div class="pipeline">
+          <div class="pipe-box pipe-data">"Hey"<span class="pipe-label">prefix</span></div>
+          <span class="pipe-arrow">&#8594;</span>
+          <div class="pipe-box pipe-fn">CreateGreeter<span class="pipe-label">HOF</span></div>
+          <span class="pipe-arrow">&#8594;</span>
+          <div class="pipe-box pipe-result">casualGreeting()<span class="pipe-label">returned function</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>The Big Three HOFs</h2>
+    <table class="cheat-table">
+      <tr><th>HOF</th><th>Purpose</th><th>Description</th><th>Data Flow</th></tr>
+      <tr><td><strong>Map</strong></td><td>Transformation</td><td>Apply a rule to each item</td><td>List &rarr; List</td></tr>
+      <tr><td><strong>Filter</strong></td><td>Selection</td><td>Keep specific items</td><td>List &rarr; List</td></tr>
+      <tr><td><strong>Fold / Reduce</strong></td><td>Reduction</td><td>Combine items into a single result</td><td>List &rarr; Item</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== MAP ===== -->
+  <div class="section" id="sec-map">
+    <h1>Map (Transformation)</h1>
+    <p class="subtitle">Apply a function to every element &mdash; returns a new list of the same size</p>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Map: transform each element</div>
+      <div class="flow-row">
+        <span class="flow-label">Input:</span>
+        <div class="flow-cell">1</div><div class="flow-cell">2</div><div class="flow-cell">3</div><div class="flow-cell">4</div><div class="flow-cell">5</div><div class="flow-cell">6</div>
+      </div>
+      <div style="text-align:center; font-size:1.2rem; color:var(--accent3); margin:8px 0;">&#8595; &nbsp; x =&gt; x * x</div>
+      <div class="flow-row">
+        <span class="flow-label">Output:</span>
+        <div class="flow-cell highlight">1</div><div class="flow-cell highlight">4</div><div class="flow-cell highlight">9</div><div class="flow-cell highlight">16</div><div class="flow-cell highlight">25</div><div class="flow-cell highlight">36</div>
+      </div>
+    </div>
+
+    <h2>Implementation</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; <span class="fn">Map</span>(<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; list, <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">int</span>&gt; transform)
+{
+    <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; result = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> list)
+    {
+        result.<span class="fn">Add</span>(transform(item));
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; numbers = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span> };
+<span class="kw">var</span> squared = <span class="fn">Map</span>(numbers, x => x * x);
+<span class="cm">// Result: 1, 4, 9, 16, 25, 36</span></code>
+    </div>
+
+    <div class="callout">
+      <strong>Key Properties:</strong> Map always returns a list of the <strong>same size</strong> as the input. It <strong>never modifies</strong> the original list &mdash; it creates a new one. The <code>Func&lt;int, int&gt;</code> parameter means "a function that takes an int and returns an int."
+    </div>
+  </div>
+
+  <!-- ===== FILTER ===== -->
+  <div class="section" id="sec-filter">
+    <h1>Filter (Selection)</h1>
+    <p class="subtitle">Keep only elements that satisfy a condition &mdash; returns a smaller (or equal) list</p>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Filter: keep elements matching predicate</div>
+      <div class="flow-row">
+        <span class="flow-label">Input:</span>
+        <div class="flow-cell">1</div><div class="flow-cell">2</div><div class="flow-cell">3</div><div class="flow-cell">4</div><div class="flow-cell">5</div><div class="flow-cell">6</div>
+      </div>
+      <div style="text-align:center; font-size:1.2rem; color:var(--orange); margin:8px 0;">&#8595; &nbsp; x =&gt; x % 2 != 0 &nbsp; (is odd?)</div>
+      <div class="flow-row">
+        <span class="flow-label">Output:</span>
+        <div class="flow-cell pass">1</div><div class="flow-cell fail">2</div><div class="flow-cell pass">3</div><div class="flow-cell fail">4</div><div class="flow-cell pass">5</div><div class="flow-cell fail">6</div>
+      </div>
+      <div class="flow-row" style="margin-top:4px;">
+        <span class="flow-label">Result:</span>
+        <div class="flow-cell pass">1</div><div class="flow-cell pass">3</div><div class="flow-cell pass">5</div>
+      </div>
+    </div>
+
+    <h2>Implementation</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; <span class="fn">Filter</span>(<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; list, <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">bool</span>&gt; predicate)
+{
+    <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; result = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt;();
+    <span class="kw">foreach</span> (<span class="kw">var</span> item <span class="kw">in</span> list)
+    {
+        <span class="kw">if</span> (predicate(item))
+            result.<span class="fn">Add</span>(item);
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; numbers = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span> };
+<span class="kw">var</span> odds = <span class="fn">Filter</span>(numbers, x => x % <span class="num">2</span> != <span class="num">0</span>);
+<span class="cm">// Result: 1, 3, 5</span></code>
+    </div>
+
+    <div class="callout">
+      <strong>Key Properties:</strong> Filter returns a list of the <strong>same or smaller</strong> size. The <code>Func&lt;int, bool&gt;</code> is called a <strong>predicate</strong> &mdash; a function that returns true/false. Elements where the predicate returns <code>true</code> are kept.
+    </div>
+  </div>
+
+  <!-- ===== REDUCE ===== -->
+  <div class="section" id="sec-reduce">
+    <h1>Reduce / Fold (Reduction)</h1>
+    <p class="subtitle">Combine all elements into a single result using an accumulator</p>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Reduce: collapse a list to a single value</div>
+      <div class="flow-row">
+        <span class="flow-label">Input:</span>
+        <div class="flow-cell">1</div><div class="flow-cell">2</div><div class="flow-cell">3</div><div class="flow-cell">4</div><div class="flow-cell">5</div><div class="flow-cell">6</div>
+      </div>
+      <div style="text-align:center; font-size:1.2rem; color:var(--yellow); margin:8px 0;">&#8595; &nbsp; (acc, x) =&gt; acc + x</div>
+      <div style="text-align:center; font-family:'Fira Code',monospace; font-size:0.85rem; color:var(--text2); line-height:2;">
+        acc = 1 &rarr; acc = 1+2 = 3 &rarr; acc = 3+3 = 6 &rarr; acc = 6+4 = 10 &rarr; acc = 10+5 = 15 &rarr; acc = 15+6 = <span style="color:var(--yellow);font-weight:700;">21</span>
+      </div>
+      <div class="flow-row">
+        <span class="flow-label">Result:</span>
+        <div class="flow-cell result" style="font-size:1.2rem;">21</div>
+      </div>
+    </div>
+
+    <h2>Implementation</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">public static</span> <span class="tp">int</span> <span class="fn">Reduce</span>(<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; list, <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">int</span>, <span class="tp">int</span>&gt; reducer)
+{
+    <span class="kw">if</span> (list.Count == <span class="num">0</span>) <span class="kw">throw new</span> <span class="tp">ArgumentException</span>(<span class="str">"List cannot be empty"</span>);
+    <span class="tp">int</span> result = list[<span class="num">0</span>];
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">1</span>; i &lt; list.Count; i++)
+    {
+        result = reducer(result, list[i]);
+    }
+    <span class="kw">return</span> result;
+}
+
+<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; numbers = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span> };
+<span class="tp">int</span> sum = <span class="fn">Reduce</span>(numbers, (acc, x) => acc + x);
+<span class="cm">// Result: 21</span></code>
+    </div>
+
+    <div class="callout warning">
+      <strong>Key Properties:</strong> Reduce transforms a <strong>List &rarr; single Item</strong>. The <code>Func&lt;int, int, int&gt;</code> takes two ints (accumulator and current element) and returns one int. The first element becomes the initial accumulator value.
+    </div>
+
+    <h2>Interactive Visualizer</h2>
+    <div class="viz-container">
+      <div class="viz-controls">
+        <label>Numbers:</label>
+        <input type="text" id="vizInput" value="1, 2, 3, 4, 5, 6">
+        <label>Operation:</label>
+        <select id="vizOp">
+          <option value="map">Map (x * x)</option>
+          <option value="filter">Filter (odd)</option>
+          <option value="reduce">Reduce (sum)</option>
+          <option value="compose">Compose all</option>
+        </select>
+        <button class="viz-btn" onclick="runViz()">Run</button>
+      </div>
+      <div class="viz-output" id="vizOutput">
+        <div style="color:var(--text2);">Select an operation and click Run.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMPOSITION ===== -->
+  <div class="section" id="sec-composition">
+    <h1>Function Composition</h1>
+    <p class="subtitle">Chaining Map, Filter, and Reduce together</p>
+
+    <h2>The Power: Composing the Big Three</h2>
+    <p>Find the <strong>sum of squared odd numbers</strong> from a list:</p>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Composition Pipeline: Sum of Squared Odd Numbers</div>
+      <div class="pipeline">
+        <div class="pipe-box pipe-data">[1,2,3,4,5,6]<span class="pipe-label">input</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-fn">Map<span class="pipe-label">x =&gt; x * x</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-filter">Filter<span class="pipe-label">x =&gt; x % 2 != 0</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-reduce">Reduce<span class="pipe-label">(acc, x) =&gt; acc + x</span></div>
+        <span class="pipe-arrow">&#8594;</span>
+        <div class="pipe-box pipe-result">35<span class="pipe-label">result</span></div>
+      </div>
+    </div>
+
+    <div class="diagram" style="padding:20px;">
+      <div class="flow-row"><span class="flow-label">Input:</span> <div class="flow-cell">1</div><div class="flow-cell">2</div><div class="flow-cell">3</div><div class="flow-cell">4</div><div class="flow-cell">5</div><div class="flow-cell">6</div></div>
+      <div style="color:var(--accent3);font-size:0.85rem;margin:6px 0 2px 68px;">&#8595; Map(x =&gt; x*x)</div>
+      <div class="flow-row"><span class="flow-label">Squared:</span> <div class="flow-cell highlight">1</div><div class="flow-cell highlight">4</div><div class="flow-cell highlight">9</div><div class="flow-cell highlight">16</div><div class="flow-cell highlight">25</div><div class="flow-cell highlight">36</div></div>
+      <div style="color:var(--orange);font-size:0.85rem;margin:6px 0 2px 68px;">&#8595; Filter(x =&gt; x % 2 != 0)</div>
+      <div class="flow-row"><span class="flow-label">Odd only:</span> <div class="flow-cell pass">1</div><div class="flow-cell pass">9</div><div class="flow-cell pass">25</div></div>
+      <div style="color:var(--yellow);font-size:0.85rem;margin:6px 0 2px 68px;">&#8595; Reduce((acc,x) =&gt; acc + x)</div>
+      <div class="flow-row"><span class="flow-label">Sum:</span> <div class="flow-cell result" style="font-size:1.1rem;">35</div></div>
+    </div>
+
+    <h2>Code</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="kw">var</span> squareFunction = <span class="kw">new</span> <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">int</span>&gt;(x => x * x);
+<span class="kw">var</span> oddFunction    = <span class="kw">new</span> <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">bool</span>&gt;(x => x % <span class="num">2</span> != <span class="num">0</span>);
+<span class="kw">var</span> sumFunction    = <span class="kw">new</span> <span class="tp">Func</span>&lt;<span class="tp">int</span>, <span class="tp">int</span>, <span class="tp">int</span>&gt;((acc, x) => acc + x);
+
+<span class="tp">List</span>&lt;<span class="tp">int</span>&gt; numbers = <span class="kw">new</span> <span class="tp">List</span>&lt;<span class="tp">int</span>&gt; { <span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span> };
+
+<span class="tp">int</span> sum2 = <span class="fn">Reduce</span>(
+    <span class="fn">Filter</span>(
+        <span class="fn">Map</span>(numbers, squareFunction),
+        oddFunction),
+    sumFunction);
+
+<span class="cm">// Result: 35  (1 + 9 + 25)</span></code>
+    </div>
+
+    <div class="callout success">
+      <strong>Read inside-out:</strong> <code>Reduce(Filter(Map(numbers, square), isOdd), sum)</code><br>
+      1. Map squares each number: [1, 4, 9, 16, 25, 36]<br>
+      2. Filter keeps odd results: [1, 9, 25]<br>
+      3. Reduce sums them: 35
+    </div>
+  </div>
+
+  <!-- ===== LINQ ===== -->
+  <div class="section" id="sec-linq">
+    <h1>LINQ</h1>
+    <p class="subtitle">Language-Integrated Query &mdash; C#'s built-in functional toolkit</p>
+
+    <div class="callout">
+      <strong>LINQ</strong> provides the same Map/Filter/Reduce operations built right into C#, with cleaner syntax and method chaining.
+    </div>
+
+    <h2>LINQ Equivalents</h2>
+    <table class="cheat-table">
+      <tr><th>Custom HOF</th><th>LINQ Method</th><th>Purpose</th></tr>
+      <tr><td><code>Map(list, fn)</code></td><td><code>.Select(fn)</code></td><td>Transform each element</td></tr>
+      <tr><td><code>Filter(list, fn)</code></td><td><code>.Where(fn)</code></td><td>Keep matching elements</td></tr>
+      <tr><td><code>Reduce(list, fn)</code></td><td><code>.Aggregate(fn)</code></td><td>Combine into single result</td></tr>
+    </table>
+
+    <h2>LINQ Examples</h2>
+    <div class="code-block">
+      <span class="code-label">C#</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <code><span class="cm">// Map: square each number</span>
+<span class="kw">var</span> squared = numbers.<span class="fn">Select</span>(x => x * x).<span class="fn">ToList</span>();
+
+<span class="cm">// Filter: get only odd numbers</span>
+<span class="kw">var</span> odds = numbers.<span class="fn">Where</span>(x => x % <span class="num">2</span> != <span class="num">0</span>).<span class="fn">ToList</span>();
+
+<span class="cm">// Reduce: sum all numbers</span>
+<span class="tp">int</span> sum = numbers.<span class="fn">Aggregate</span>((acc, x) => acc + x);
+
+<span class="cm">// Composition with chaining!</span>
+<span class="tp">int</span> sum2 = numbers
+    .<span class="fn">Select</span>(x => x * x)           <span class="cm">// Map: square</span>
+    .<span class="fn">Where</span>(x => x % <span class="num">2</span> != <span class="num">0</span>)       <span class="cm">// Filter: keep odd</span>
+    .<span class="fn">Aggregate</span>((acc, x) => acc + x); <span class="cm">// Reduce: sum</span>
+<span class="cm">// Result: 35</span></code>
+    </div>
+
+    <div class="callout success">
+      <strong>Method Chaining:</strong> LINQ lets you chain operations with dots instead of nesting function calls. This reads top-to-bottom, left-to-right &mdash; much easier than inside-out nesting like <code>Reduce(Filter(Map(...)))</code>.
+    </div>
+
+    <!-- Diagram: chaining -->
+    <div class="diagram">
+      <div class="diagram-title">LINQ Method Chaining vs Nested Calls</div>
+      <div class="compare-grid" style="margin:0;">
+        <div class="compare-box imperative" style="border-top-color:var(--accent3);">
+          <h4 style="color:var(--accent3);">Nested (Custom HOFs)</h4>
+          <code style="font-size:0.8rem;">Reduce(Filter(Map(list, sq), odd), sum)</code>
+          <p style="margin-top:8px;">Read inside-out</p>
+        </div>
+        <div class="compare-box functional">
+          <h4>Chained (LINQ)</h4>
+          <code style="font-size:0.8rem;">list.Select(sq).Where(odd).Aggregate(sum)</code>
+          <p style="margin-top:8px;">Read left-to-right</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PERSISTENT DATA STRUCTURES ===== -->
+  <div class="section" id="sec-pds">
+    <h1>Persistent Data Structures</h1>
+    <p class="subtitle">Immutable data that preserves all previous versions</p>
+
+    <h2>Features</h2>
+    <div class="card-grid">
+      <div class="card" style="border-left: 4px solid var(--green);">
+        <h4>Immutable</h4>
+        <p><code>x = x + 1</code> &mdash; <strong>Not OK</strong><br>
+        <code>y = x + 1</code> &mdash; <strong>OK</strong><br>
+        You create new values, never modify old ones.</p>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h4>Version Preservation</h4>
+        <p>Updates create a <strong>new version</strong> while keeping the old version intact. Every previous state is accessible.</p>
+      </div>
+    </div>
+
+    <h2>Real-World Examples</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Git (Version Control)</h4>
+        <p>Every commit is a snapshot. Old commits are never modified &mdash; new commits are created. You can always go back to any previous state.</p>
+      </div>
+      <div class="card">
+        <h4>ZFS File System</h4>
+        <p>Copy-on-write filesystem. Writes create new blocks rather than overwriting old ones. Enables snapshots and rollbacks.</p>
+      </div>
+    </div>
+
+    <!-- Diagram -->
+    <div class="diagram">
+      <div class="diagram-title">Persistent Data: New version, old version intact</div>
+      <div style="display:flex; gap:24px; justify-content:center; align-items:center; flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">Version 1</div>
+          <div class="flow-row" style="justify-content:center;">
+            <div class="flow-cell">A</div><div class="flow-cell">B</div><div class="flow-cell">C</div>
+          </div>
+        </div>
+        <span style="font-size:1.5rem;color:var(--text2);">&#8594;</span>
+        <div style="text-align:center;">
+          <div style="font-size:0.8rem;color:var(--green);margin-bottom:8px;">Version 2 (new)</div>
+          <div class="flow-row" style="justify-content:center;">
+            <div class="flow-cell">A</div><div class="flow-cell pass">X</div><div class="flow-cell">C</div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:4px;">B &rarr; X (new copy created)</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:0.85rem;color:var(--text2);">Version 1 still exists unchanged &mdash; both versions coexist</div>
+    </div>
+
+    <div class="callout success">
+      <strong>Persistence is the backbone of Functional Programming.</strong> Since data is never mutated, every transformation produces a new version. This makes programs predictable, testable, and safe for concurrent access.
+    </div>
+  </div>
+
+  <!-- ===== FLASHCARDS ===== -->
+  <div class="section" id="sec-flashcards">
+    <h1>Flashcards</h1>
+    <p class="subtitle">Click to flip. Arrow keys or buttons to navigate.</p>
+    <div class="flashcard-container">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-front">
+          <h3 id="fc-question"></h3>
+          <p>Click to reveal answer</p>
+        </div>
+        <div class="flashcard-back">
+          <p id="fc-answer"></p>
+        </div>
+      </div>
+    </div>
+    <div class="flashcard-nav">
+      <button onclick="prevCard()">&#9664; Prev</button>
+      <span class="flashcard-counter" id="fc-counter">1 / 20</span>
+      <button onclick="nextCard()">Next &#9654;</button>
+      <button onclick="shuffleCards()">&#128256; Shuffle</button>
+    </div>
+  </div>
+
+  <!-- ===== CHEAT SHEET ===== -->
+  <div class="section" id="sec-cheatsheet">
+    <h1>Cheat Sheet</h1>
+    <p class="subtitle">Quick reference for exam day</p>
+
+    <h2>FP Core Concepts</h2>
+    <table class="cheat-table">
+      <tr><th>Concept</th><th>Definition</th></tr>
+      <tr><td>Functional Programming</td><td>Computation as evaluation of mathematical functions (Lambda Calculus)</td></tr>
+      <tr><td>Immutability</td><td>Variables are constants &mdash; never changed after creation</td></tr>
+      <tr><td>Pure Function</td><td>Deterministic + no side effects. Same input &rarr; same output.</td></tr>
+      <tr><td>Impure Function</td><td>Has side effects (I/O, global state changes, non-deterministic)</td></tr>
+      <tr><td>First-Class Functions</td><td>Functions can be stored in variables, passed as arguments, returned</td></tr>
+      <tr><td>Declarative Style</td><td>Describe <em>what</em> you want, not <em>how</em> to get it</td></tr>
+    </table>
+
+    <h2>Higher-Order Functions</h2>
+    <table class="cheat-table">
+      <tr><th>HOF</th><th>Custom</th><th>LINQ</th><th>Data Flow</th><th>Func Type</th></tr>
+      <tr><td><strong>Map</strong></td><td><code>Map(list, fn)</code></td><td><code>.Select(fn)</code></td><td>List &rarr; List (same size)</td><td><code>Func&lt;int, int&gt;</code></td></tr>
+      <tr><td><strong>Filter</strong></td><td><code>Filter(list, fn)</code></td><td><code>.Where(fn)</code></td><td>List &rarr; List (&le; size)</td><td><code>Func&lt;int, bool&gt;</code></td></tr>
+      <tr><td><strong>Reduce</strong></td><td><code>Reduce(list, fn)</code></td><td><code>.Aggregate(fn)</code></td><td>List &rarr; single Item</td><td><code>Func&lt;int, int, int&gt;</code></td></tr>
+    </table>
+
+    <h2>Function Composition Example</h2>
+    <div class="code-block">
+      <code><span class="cm">// Sum of squared odd numbers from [1,2,3,4,5,6]</span>
+
+<span class="cm">// Nested (custom):</span>
+<span class="fn">Reduce</span>(<span class="fn">Filter</span>(<span class="fn">Map</span>(numbers, x => x*x), x => x%<span class="num">2</span>!=<span class="num">0</span>), (a,x) => a+x)
+
+<span class="cm">// Chained (LINQ):</span>
+numbers.<span class="fn">Select</span>(x => x*x).<span class="fn">Where</span>(x => x%<span class="num">2</span>!=<span class="num">0</span>).<span class="fn">Aggregate</span>((a,x) => a+x)
+
+<span class="cm">// Result: 35  (1 + 9 + 25)</span></code>
+    </div>
+
+    <h2>Persistent Data Structures</h2>
+    <table class="cheat-table">
+      <tr><th>Property</th><th>Description</th></tr>
+      <tr><td>Immutable</td><td><code>x = x + 1</code> NOT OK. <code>y = x + 1</code> OK.</td></tr>
+      <tr><td>Versioned</td><td>Updates create new versions, old versions remain intact</td></tr>
+      <tr><td>Examples</td><td>Git (version control), ZFS (filesystem)</td></tr>
+      <tr><td>Role</td><td>Backbone of FP &mdash; no mutation means no bugs from shared state</td></tr>
+    </table>
+
+    <h2>Architecture</h2>
+    <table class="cheat-table">
+      <tr><th>Layer</th><th>Style</th><th>Contains</th></tr>
+      <tr><td>Functional Core</td><td>Pure functions</td><td>Business logic, calculations, transformations</td></tr>
+      <tr><td>Imperative Shell</td><td>Side effects OK</td><td>DB, network, user input, file I/O</td></tr>
+    </table>
+  </div>
+
+  <!-- ===== QUIZ ===== -->
+  <div class="section" id="sec-quiz">
+    <h1>Practice Quiz</h1>
+    <p class="subtitle">Test your knowledge &mdash; 15 questions on Functional Programming</p>
+    <div id="quizContainer"></div>
+    <div class="quiz-score" id="quizScore">
+      <h3>Quiz Complete!</h3>
+      <div class="score-num" id="scoreNum"></div>
+      <p id="scoreMsg"></p>
+      <button class="quiz-reset" onclick="resetQuiz()">Retake Quiz</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ======== NAVIGATION ========
+const visited = new Set(['overview']);
+const topicSections = ['motivation','philosophy','whyfp','multiparadigm','hof','map','filter','reduce','composition','linq','pds'];
+const totalTopics = topicSections.length;
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector(`.nav-link[data-section="${id}"]`);
+  if (link) link.classList.add('active');
+  visited.add(id);
+  updateProgress();
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').style.display = 'none';
+  }
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  const done = topicSections.filter(t => visited.has(t)).length;
+  const pct = Math.round((done / totalTopics) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = done + ' / ' + totalTopics + ' topics';
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  if (window.innerWidth <= 768) {
+    sb.classList.toggle('open');
+    ov.style.display = sb.classList.contains('open') ? 'block' : 'none';
+  } else {
+    sb.classList.toggle('closed');
+    document.getElementById('main').classList.toggle('full');
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.getAttribute('data-theme') === 'light';
+  document.body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  document.getElementById('themeBtn').innerHTML = isLight ? '&#9790; Dark' : '&#9788; Light';
+  localStorage.setItem('theme-fp', isLight ? 'dark' : 'light');
+}
+(function() {
+  const saved = localStorage.getItem('theme-fp');
+  if (saved === 'light') { document.body.setAttribute('data-theme', 'light'); document.getElementById('themeBtn').innerHTML = '&#9788; Light'; }
+})();
+
+function copyCode(btn) {
+  const code = btn.parentElement.querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1500); });
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.nav-link').forEach(link => { link.style.display = link.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+});
+
+// ======== INTERACTIVE VISUALIZER ========
+function runViz() {
+  const raw = document.getElementById('vizInput').value;
+  const nums = raw.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  const op = document.getElementById('vizOp').value;
+  const out = document.getElementById('vizOutput');
+  if (nums.length === 0) { out.innerHTML = '<span style="color:var(--red);">Enter valid numbers.</span>'; return; }
+
+  let html = '';
+  const fmtArr = arr => '[' + arr.join(', ') + ']';
+  const mapped = nums.map(x => x * x);
+  const filtered = mapped.filter(x => x % 2 !== 0);
+  const reduced = filtered.reduce((a, b) => a + b, 0);
+
+  if (op === 'map') {
+    html += `<div style="color:var(--text2);">Input: ${fmtArr(nums)}</div>`;
+    html += `<div style="color:var(--accent3);margin:6px 0;">x =&gt; x * x</div>`;
+    nums.forEach((n, i) => {
+      html += `<div style="color:var(--accent);">&nbsp;&nbsp;${n} &rarr; ${n} * ${n} = <strong>${n*n}</strong></div>`;
+    });
+    html += `<div style="color:var(--green);font-weight:700;margin-top:8px;">Result: ${fmtArr(mapped)}</div>`;
+  } else if (op === 'filter') {
+    const fNums = nums.filter(x => x % 2 !== 0);
+    html += `<div style="color:var(--text2);">Input: ${fmtArr(nums)}</div>`;
+    html += `<div style="color:var(--orange);margin:6px 0;">x =&gt; x % 2 != 0 (is odd?)</div>`;
+    nums.forEach(n => {
+      const pass = n % 2 !== 0;
+      const c = pass ? 'var(--green)' : 'var(--red)';
+      const sym = pass ? '&#10004;' : '&#10008;';
+      html += `<div style="color:${c};">&nbsp;&nbsp;${n} % 2 != 0 &rarr; ${pass} ${sym}</div>`;
+    });
+    html += `<div style="color:var(--green);font-weight:700;margin-top:8px;">Result: ${fmtArr(fNums)}</div>`;
+  } else if (op === 'reduce') {
+    html += `<div style="color:var(--text2);">Input: ${fmtArr(nums)}</div>`;
+    html += `<div style="color:var(--yellow);margin:6px 0;">(acc, x) =&gt; acc + x</div>`;
+    let acc = nums[0];
+    html += `<div>&nbsp;&nbsp;acc = ${acc} (first element)</div>`;
+    for (let i = 1; i < nums.length; i++) {
+      const prev = acc;
+      acc += nums[i];
+      html += `<div style="color:var(--yellow);">&nbsp;&nbsp;acc = ${prev} + ${nums[i]} = <strong>${acc}</strong></div>`;
+    }
+    html += `<div style="color:var(--green);font-weight:700;margin-top:8px;">Result: ${acc}</div>`;
+  } else {
+    html += `<div style="color:var(--text2);">Input: ${fmtArr(nums)}</div>`;
+    html += `<div style="color:var(--accent3);margin:6px 0;">Step 1: Map(x =&gt; x * x)</div>`;
+    html += `<div>&nbsp;&nbsp;${fmtArr(nums)} &rarr; ${fmtArr(mapped)}</div>`;
+    html += `<div style="color:var(--orange);margin:6px 0;">Step 2: Filter(x =&gt; x % 2 != 0)</div>`;
+    html += `<div>&nbsp;&nbsp;${fmtArr(mapped)} &rarr; ${fmtArr(filtered)}</div>`;
+    html += `<div style="color:var(--yellow);margin:6px 0;">Step 3: Reduce((acc, x) =&gt; acc + x)</div>`;
+    let acc = filtered[0] || 0;
+    for (let i = 1; i < filtered.length; i++) {
+      const prev = acc; acc += filtered[i];
+      html += `<div style="color:var(--yellow);">&nbsp;&nbsp;${prev} + ${filtered[i]} = ${acc}</div>`;
+    }
+    html += `<div style="color:var(--green);font-weight:700;margin-top:8px;">Final Result: ${filtered.length > 0 ? reduced : 0}</div>`;
+  }
+  out.innerHTML = html;
+}
+
+// ======== FLASHCARDS ========
+const flashcards = [
+  { q: "What is Functional Programming?", a: "A paradigm that treats computation as the evaluation of mathematical functions. Rooted in Lambda Calculus (Alonzo Church). Emphasizes immutability and pure functions." },
+  { q: "What is a Pure Function?", a: "A function that is deterministic (same input \u2192 same output) and has no side effects (doesn't change global state or alter input). Simply returns new values." },
+  { q: "What is an Impure Function?", a: "A function that has side effects \u2014 it may modify global state, perform I/O, or produce different outputs for the same input." },
+  { q: "What does Immutability mean in FP?", a: "Variables are constants \u2014 once set, they never change. x = x + 1 is NOT allowed. y = x + 1 creates a new value instead." },
+  { q: "What is a First-Class Function?", a: "A function that can be stored in variables, passed as arguments to other functions, and returned as values from functions." },
+  { q: "What is a Higher-Order Function (HOF)?", a: "A function that meets at least one requirement: (A) Accepts a function as an argument, or (B) Returns a function as its result." },
+  { q: "What are the Big Three HOFs?", a: "Map (transformation, List\u2192List), Filter (selection, List\u2192List), and Reduce/Fold (reduction, List\u2192Item)." },
+  { q: "What does Map do?", a: "Applies a transformation function to every element in a list. Returns a new list of the same size. C# LINQ: .Select()" },
+  { q: "What does Filter do?", a: "Keeps only elements that satisfy a predicate (condition returning bool). Returns a list of same or smaller size. C# LINQ: .Where()" },
+  { q: "What does Reduce (Fold) do?", a: "Combines all elements into a single result using an accumulator function. Takes Func<int,int,int> (acc, current) \u2192 new acc. C# LINQ: .Aggregate()" },
+  { q: "What is Func<int, bool> in C#?", a: "A delegate type representing a function that takes an int parameter and returns a bool. Used for predicates in Filter." },
+  { q: "What is Func<int, int, int> in C#?", a: "A delegate type representing a function that takes two int parameters and returns an int. Used for reducers (accumulator, current) \u2192 result." },
+  { q: "What is Function Composition?", a: "Chaining multiple functions together: Reduce(Filter(Map(list, sq), isOdd), sum). Each function's output becomes the next function's input." },
+  { q: "What are the LINQ equivalents of Map, Filter, Reduce?", a: "Map = .Select(), Filter = .Where(), Reduce = .Aggregate(). LINQ allows method chaining: list.Select().Where().Aggregate()." },
+  { q: "Why is FP good for concurrency?", a: "Since data is immutable, you never have race conditions. Multiple threads can safely read the same data without locks or synchronization." },
+  { q: "What is the Functional Core / Imperative Shell pattern?", a: "Core: pure functions for business logic (easy to test, no side effects). Shell: imperative code for real-world interaction (DB, network, I/O)." },
+  { q: "What is a Persistent Data Structure?", a: "An immutable data structure where updates create a new version while keeping the old version intact. Examples: Git, ZFS filesystem." },
+  { q: "What is the difference between imperative and declarative style?", a: "Imperative: step-by-step instructions (HOW). Declarative: describe the result (WHAT). FP is declarative: sum(filter(isEven, list))." },
+  { q: "What is a lambda expression in C#?", a: "An anonymous inline function: x => x * x. Can be passed directly as arguments to HOFs without defining a named method." },
+  { q: "What is the result of composing Map(x*x), Filter(isOdd), Reduce(sum) on [1,2,3,4,5,6]?", a: "Map: [1,4,9,16,25,36] \u2192 Filter: [1,9,25] \u2192 Reduce: 1+9+25 = 35" }
+];
+
+let fcIndex = 0;
+function renderCard() {
+  document.getElementById('fc-question').textContent = flashcards[fcIndex].q;
+  document.getElementById('fc-answer').textContent = flashcards[fcIndex].a;
+  document.getElementById('fc-counter').textContent = (fcIndex + 1) + ' / ' + flashcards.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextCard() { fcIndex = (fcIndex + 1) % flashcards.length; renderCard(); }
+function prevCard() { fcIndex = (fcIndex - 1 + flashcards.length) % flashcards.length; renderCard(); }
+function shuffleCards() {
+  for (let i = flashcards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]]; }
+  fcIndex = 0; renderCard();
+}
+renderCard();
+
+// ======== QUIZ ========
+const quizData = [
+  { q: "What is the root of Functional Programming?", opts: ["Turing Machine", "Lambda Calculus (Alonzo Church)", "Von Neumann Architecture", "Boolean Algebra"], correct: 1, explain: "FP is based on Lambda Calculus, created by Alonzo Church \u2014 not the Turing Machine." },
+  { q: "Which of the following is a Pure Function?", opts: ["A function that writes to a file", "A function that modifies a global variable", "A function that returns the same output for the same input with no side effects", "A function that reads user input"], correct: 2, explain: "Pure functions are deterministic and have no side effects. They only depend on their inputs and return new values." },
+  { q: "What does 'immutability' mean in FP?", opts: ["Variables can be changed freely", "Variables are constants \u2014 never changed after creation", "Only global variables are constant", "Functions cannot be modified"], correct: 1, explain: "In FP, variables are constants. x = x + 1 is not allowed; instead y = x + 1 creates a new value." },
+  { q: "What is a Higher-Order Function?", opts: ["A function that runs faster", "A function that accepts or returns other functions", "A function with more than 3 parameters", "A recursive function"], correct: 1, explain: "A HOF must either accept a function as an argument (Req A) or return a function as its result (Req B)." },
+  { q: "What does Map do?", opts: ["Filters elements from a list", "Combines all elements into one", "Applies a transformation to every element, returning a list of the same size", "Sorts the list"], correct: 2, explain: "Map applies a transformation function to each element. Input list size = output list size." },
+  { q: "What is the LINQ equivalent of Map?", opts: [".Where()", ".Select()", ".Aggregate()", ".OrderBy()"], correct: 1, explain: "Map = .Select() in LINQ. It transforms each element using the provided function." },
+  { q: "What is the LINQ equivalent of Filter?", opts: [".Select()", ".Where()", ".Aggregate()", ".First()"], correct: 1, explain: "Filter = .Where() in LINQ. It keeps elements where the predicate returns true." },
+  { q: "What is the LINQ equivalent of Reduce?", opts: [".Select()", ".Where()", ".Sum()", ".Aggregate()"], correct: 3, explain: "Reduce = .Aggregate() in LINQ. It combines all elements into a single result using an accumulator function." },
+  { q: "What type is Func<int, bool> in C#?", opts: ["A function taking bool, returning int", "A function taking int, returning bool", "A function taking two ints", "An integer variable"], correct: 1, explain: "Func<int, bool> is a delegate: takes an int parameter, returns a bool. Used as a predicate in Filter." },
+  { q: "What is the result of Map(x => x*x) on [1, 2, 3]?", opts: ["[1, 2, 3]", "[2, 4, 6]", "[1, 4, 9]", "[1, 3, 5]"], correct: 2, explain: "Map squares each element: 1*1=1, 2*2=4, 3*3=9. Result: [1, 4, 9]." },
+  { q: "What is the result of Filter(x => x % 2 != 0) on [1, 2, 3, 4, 5, 6]?", opts: ["[2, 4, 6]", "[1, 3, 5]", "[1, 2, 3]", "[4, 5, 6]"], correct: 1, explain: "Filter keeps elements where x % 2 != 0 (odd numbers): [1, 3, 5]." },
+  { q: "What is the result of Reduce((acc, x) => acc + x) on [1, 2, 3, 4, 5, 6]?", opts: ["6", "15", "21", "36"], correct: 2, explain: "Reduce sums: 1+2=3, 3+3=6, 6+4=10, 10+5=15, 15+6=21. Result: 21." },
+  { q: "In Reduce(Filter(Map(numbers, square), isOdd), sum) on [1,2,3,4,5,6], what is the result?", opts: ["21", "91", "35", "50"], correct: 2, explain: "Map: [1,4,9,16,25,36]. Filter odd: [1,9,25]. Reduce sum: 1+9+25 = 35." },
+  { q: "Why is FP good for concurrent programming?", opts: ["It uses locks automatically", "Immutable data means no race conditions", "It runs on multiple CPUs", "It uses async/await"], correct: 1, explain: "Since data is immutable in FP, multiple threads can safely read it without locks or synchronization." },
+  { q: "What is a Persistent Data Structure?", opts: ["Data stored on disk", "Data that survives a reboot", "Immutable data where updates create new versions, keeping old versions intact", "A database table"], correct: 2, explain: "PDS are immutable. Updates create new versions while old versions remain intact. Examples: Git, ZFS." }
+];
+
+let quizAnswered = 0, quizCorrect = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = ''; quizAnswered = 0; quizCorrect = 0;
+  document.getElementById('quizScore').style.display = 'none';
+  quizData.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-question'; div.id = 'qq-' + i;
+    let opts = '';
+    item.opts.forEach((o, j) => { opts += `<button class="quiz-option" onclick="answerQuiz(${i},${j})">${o}</button>`; });
+    div.innerHTML = `<h4><span class="q-num">Q${i+1}</span> ${item.q}</h4>${opts}<div class="quiz-explanation" id="qe-${i}">${item.explain}</div>`;
+    container.appendChild(div);
+  });
+}
+
+function answerQuiz(qi, oi) {
+  const q = document.getElementById('qq-' + qi);
+  const btns = q.querySelectorAll('.quiz-option');
+  if (btns[0].classList.contains('disabled')) return;
+  quizAnswered++;
+  const correct = quizData[qi].correct;
+  btns.forEach((b, j) => { b.classList.add('disabled'); if (j === correct) b.classList.add('correct'); if (j === oi && oi !== correct) b.classList.add('wrong'); });
+  if (oi === correct) quizCorrect++;
+  document.getElementById('qe-' + qi).classList.add('show');
+  if (quizAnswered === quizData.length) setTimeout(showScore, 600);
+}
+
+function showScore() {
+  const sc = document.getElementById('quizScore'); sc.style.display = 'block';
+  const pct = Math.round((quizCorrect / quizData.length) * 100);
+  document.getElementById('scoreNum').textContent = quizCorrect + ' / ' + quizData.length;
+  document.getElementById('scoreNum').style.color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--orange)' : 'var(--red)';
+  document.getElementById('scoreMsg').textContent = pct >= 90 ? "Excellent! You've mastered FP!" : pct >= 70 ? "Good job! Review the missed topics." : pct >= 50 ? "Getting there. Revisit the flashcards." : "Keep studying! Review each section carefully.";
+  sc.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetQuiz() { buildQuiz(); document.getElementById('quizContainer').scrollIntoView({ behavior: 'smooth' }); }
+buildQuiz();
+
+// ======== KEYBOARD SHORTCUTS ========
+document.addEventListener('keydown', function(e) {
+  const active = document.querySelector('.section.active');
+  if (active && active.id === 'sec-flashcards') {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  }
+});
+</script>
+</body>
+</html>
